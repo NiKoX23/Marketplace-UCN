@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+:root {
+    --background-color:#0f172a;
+    --text-title-color: #ebebeb;
+    --header-bg: rgba(15, 23, 42, 0.9);
+    --sidebar-bg:#020617;
+    --text-color:#ebebeb;
+    --menu-color:#64748b;
+
+    --text-selected-color:#e2e8f0;
+    --background-selected: #37383a;
+    --background-hover:#37383a;
+    
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Nunito Sans", sans-serif;
+}
+
+.inicio {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: var(--background-color);
+}
+
+.headerBarraLateral {
+    border: none;
+    z-index: 200;
+    width: 100%;
+    background-color: var(--header-bg);
+    backdrop-filter: blur(10px);
+    display:flex;
+    justify-content: space-between;
+    padding: 0.6rem 1.5rem;
+    position: fixed;
+    top:0;
+    left:0;
+    border-bottom: 1px solid #1e293b;
+
+
+}
+
+.usuario {
+    font-weight: 600;
+    color: var(--text-title-color);
+}
+
+.izquierda {
+    margin-top: 10px;
+    border: none;
+}
+
+.derecha {
+    margin-top: 10px;
+    display: flex;
+}
+
+.barra-lateral {
+    position: fixed;
+    top: 0;
+    left: -250px;
+    width: 250px;
+    height: 100%;
+    background-color: var(--sidebar-bg);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    padding: 5rem 1.2rem 1rem;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+}
+
+.barra-lateral.activa {
+    left: 0;
+}
+
+.barra-lateral h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.4rem;
+    letter-spacing: -0.025em;
+    color: var(--text-title-color);
+}
+
+.barra-lateral ul {
+    list-style: none;
+}
+
+.barra-lateral li {
+    padding: 0.9rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-color);
+    transition: all 0.2s;
+}
+
+.barra-lateral li:hover {
+    background: var(--background-hover);
+    color: var(--text-selected-color);
+}
+
+.barra-lateral.activa {
+    left: 0;
+}
+
+.botonMenu, .botonPerfil{
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.6rem;
+    border: none;
+    border-radius: 50px;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.botonMenu:hover, .botonPerfil:hover {
+    background: var(--background-hover);
+}
+
+
+.botonMenu.activo, .botonPerfil.activo {
+    background: var(--background-selected);
+    color: var(--text-selected-color);
+}
+
+.botonMenu i, .botonPerfil i {
+    font-size: 1.4rem;
+    color: var(--text-color);
+}
