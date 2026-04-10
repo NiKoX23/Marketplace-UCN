@@ -31,7 +31,7 @@ export interface Ticket {
 
 @WebSocketGateway({ cors: { origin: '*' } })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server: Server;
+  @WebSocketServer() server!: Server;
   private logger: Logger = new Logger('ChatGateway');
 
   private tickets: Ticket[] = [];
