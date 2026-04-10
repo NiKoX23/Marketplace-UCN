@@ -1,0 +1,294 @@
+.chat-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 400px;
+  height: 600px;
+  background: rgba(15, 23, 42, 0.85); /* Darker sleek background */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  color: #fff;
+  overflow: hidden;
+}
+
+.chat-header {
+  padding: 0;
+  background: rgba(2, 6, 23, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tabs {
+  display: flex;
+  flex: 1;
+}
+
+.tabs button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 15px 0;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+.tabs button.active {
+  color: #38bdf8;
+  border-bottom: 2px solid #38bdf8;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tabs button:hover:not(.active) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.close-btn {
+  color: rgba(255, 255, 255, 0.6) !important;
+  margin-right: 10px;
+}
+.close-btn:hover {
+  color: #fff !important;
+}
+
+.chat-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* LIST VIEWS */
+.list-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.new-chat, .new-ticket-action {
+  padding: 15px;
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.new-chat input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  border-radius: 20px !important;
+  padding: 8px 15px !important;
+}
+.new-chat input::placeholder { color: rgba(255,255,255, 0.5); }
+
+.new-chat button, .new-ticket-action button {
+  background: #38bdf8 !important;
+  border: none !important;
+  color: #000 !important;
+}
+.new-ticket-action button {
+  width: 100%;
+  border-radius: 8px !important;
+  font-weight: 600;
+}
+
+.chats-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.list-item {
+  padding: 12px 15px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 1px solid transparent;
+}
+
+.list-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.item-title {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-desc {
+  font-size: 0.85rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* ACTIVE CHAT/TICKET */
+.active-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.chat-header-actions h4 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 1.1rem;
+}
+
+.messages-container {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+}
+.message.sent { align-self: flex-end; }
+.message.received { align-self: flex-start; }
+
+.sender {
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #94a3b8;
+  margin-left: 2px;
+}
+
+.message-bubble {
+  padding: 10px 14px;
+  border-radius: 14px;
+  position: relative;
+  line-height: 1.4;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.message-bubble p {
+  margin: 0;
+}
+
+.sent .message-bubble {
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #fff;
+  border-radius: 14px 14px 0 14px;
+}
+
+.received .message-bubble {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  border-radius: 14px 14px 14px 0;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.timestamp {
+  font-size: 0.65rem;
+  margin-top: 4px;
+  display: block;
+  text-align: right;
+  opacity: 0.7;
+}
+
+.chat-input-container {
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.chat-input-container input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  border-radius: 20px !important;
+  padding: 8px 15px !important;
+}
+
+.chat-input-container input::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+.chat-input-container button {
+  background: linear-gradient(135deg, #38bdf8, #0ea5e9) !important;
+  border: none !important;
+  color: white !important;
+  transition: transform 0.2s;
+}
+.chat-input-container button:hover { transform: scale(1.05); }
+
+/* CREATE TICKET MODAL/VIEW */
+.create-ticket {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.form-container {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-container input, .form-container textarea {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+}
+
+.form-container input::placeholder, .form-container textarea::placeholder { color: rgba(255,255,255,0.5); }
+
+.form-container button {
+  margin-top: 10px;
+  background: linear-gradient(135deg, #38bdf8, #2563eb) !important;
+  border: none !important;
+  font-weight: bold;
+}
+
+/* Scrollbar customization */
+.messages-container::-webkit-scrollbar, .chats-list::-webkit-scrollbar {
+  width: 6px;
+}
+.messages-container::-webkit-scrollbar-thumb, .chats-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}

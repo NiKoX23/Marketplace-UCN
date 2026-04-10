@@ -107,7 +107,7 @@
     left: 0;
 }
 
-.botonMenu, .botonPerfil{
+.botonMenu, .botonPerfil, .botonChat{
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -119,17 +119,17 @@
     font-weight: 500;
 }
 
-.botonMenu:hover, .botonPerfil:hover {
+.botonMenu:hover, .botonPerfil:hover, .botonChat:hover {
     background: var(--background-hover);
 }
 
 
-.botonMenu.activo, .botonPerfil.activo {
+.botonMenu.activo, .botonPerfil.activo, .botonChat.activo {
     background: var(--background-selected);
     color: var(--text-selected-color);
 }
 
-.botonMenu i, .botonPerfil i {
+.botonMenu i, .botonPerfil i, .botonChat i {
     font-size: 1.4rem;
     color: var(--text-color);
 }

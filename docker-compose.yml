@@ -9,6 +9,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
+    env_file: .env
     command: npm run start:dev
 
   frontend:
