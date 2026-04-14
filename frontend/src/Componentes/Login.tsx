@@ -3,42 +3,51 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Divider } from "primereact/divider";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import "../Css/Login.css";
+
+const API = "http://localhost:3000/auth";
 
 function Login() {
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
-  const [rut, setRut] = useState("");
-  const [contraseña, setContraseña] = useState("");
+  const [identificador, setIdentificador] = useState(""); // RUT o email
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [cargando, setCargando] = useState(false);
   const navigate = useNavigate();
 
-  const login= async (e: React.FormEvent<HTMLFormElement>) => {
+  const login = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
+    setCargando(true);
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch(`${API}/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({rut, contraseña})
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ identificador, password }),
       });
 
       const data = await response.json();
       if (data.ok) {
-        localStorage.setItem("accessToken", data.token);
+        localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
         navigate("/inicio");
-      }else {
-        console.log("RUT o contraseña incorrectos");
+      } else {
+        setError("RUT/email o contraseña incorrectos");
       }
-
-    }catch (error) {
-      console.error("Error en el login:", error);
+    } catch {
+      setError("Error de conexión. Intenta más tarde.");
+    } finally {
+      setCargando(false);
     }
-  }
-  console.log("render");
+  };
 
-  return(
+  const loginGoogle = () => {
+    // Redirige al backend que inicia el flujo OAuth con Google
+    window.location.href = `${API}/google`;
+  };
+
+  return (
     <div className="pagina-login">
       <div className="login">
         <header className="login-header">
@@ -48,38 +57,58 @@ function Login() {
 
         <div className="formulario">
           <form onSubmit={login}>
-            <InputText className="input" 
-                      placeholder="RUT"
-                      value={rut} onChange={(e) => setRut(e.target.value)} />
+            <InputText
+              className="input"
+              placeholder="RUT o Email"
+              value={identificador}
+              onChange={(e) => setIdentificador(e.target.value)}
+              required
+            />
             <div className="password-container">
               <InputText
                 type={mostrarContraseña ? "text" : "password"}
                 className="input"
                 placeholder="Contraseña"
-                value={contraseña}
-                onChange={(e) => setContraseña(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
               />
-              <i 
+              <i
                 className={`pi ${mostrarContraseña ? "pi-eye-slash" : "pi-eye"} password-icon`}
                 onClick={() => setMostrarContraseña(!mostrarContraseña)}
-              ></i>
-              
+              />
             </div>
-            <Button type="submit" label="Iniciar Sesión" className="p-button-outlined boton-iniciarSesion" aria-label="Iniciar Sesión" />
+
+            {error && <p className="error-mensaje">{error}</p>}
+
+            <Button
+              type="submit"
+              label={cargando ? "Ingresando..." : "Iniciar Sesión"}
+              className="p-button-outlined boton-iniciarSesion"
+              disabled={cargando}
+            />
           </form>
         </div>
 
-        <Divider className="divider"></Divider>
+        <p className="link-registro">
+          ¿No tienes cuenta?{" "}
+          <Link to="/registro">Regístrate aquí</Link>
+        </p>
 
-        <Button type="submit"className="p-button-outlined boton-google" aria-label="Google">
+        <Divider className="divider" />
+
+        <Button
+          type="button"
+          className="p-button-outlined boton-google"
+          onClick={loginGoogle}
+          aria-label="Google"
+        >
           <img alt="logo" src={LogoGoogle} className="google-icon" />
           <span className="google-text">Continuar con Google</span>
         </Button>
-        
       </div>
     </div>
-
-  )
-} 
+  );
+}
 
 export default Login;

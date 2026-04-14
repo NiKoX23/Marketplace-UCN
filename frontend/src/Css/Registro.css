@@ -1,0 +1,29 @@
+/* Registro.css — Estilos adicionales para la página de registro */
+
+.registro-card {
+    max-width: 460px;
+}
+
+.fila-doble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.exito-mensaje {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+    border: 1px solid rgba(74, 222, 128, 0.3);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.exito-mensaje .pi {
+    font-size: 22px;
+}

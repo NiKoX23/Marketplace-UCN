@@ -129,3 +129,32 @@
 .google-icon {
     width: 25px;
 }
+
+.error-mensaje {
+    color: #f87171;
+    font-size: 13px;
+    text-align: center;
+    background: rgba(248, 113, 113, 0.1);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.link-registro {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+    margin-top: 12px;
+}
+
+.link-registro a {
+    color: #60a5fa;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.link-registro a:hover {
+    color: #93c5fd;
+    text-decoration: underline;
+}

@@ -1,68 +1,93 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { UsuariosService, CreateUsuarioDto } from '../usuarios/usuarios.service';
+import { Usuario } from '../usuarios/usuario.entity';
+
+export interface Tokens {
+  accessToken: string;
+  refreshToken: string;
+}
 
 @Injectable()
 export class AuthService {
-    
-    private usuarios = [
-      {
-        rut: "12345678-9",
-        pwdHash: "$2b$10$VmIv0x6VsdPQWef7cmo0f.XXVWyk/JQCnY0ctvkzgJiuTa1FbfWrW",
-      },
-      {
-        rut: "admin",
-        pwdHash: "$2b$10$6l3pD1uF.3I7uJ.p5q6x7uR4.kQ7Z9u7Y/e9P8J/3e.7.k.S.M.v.P", // hash for 'admin'
-      }
-    ];
+  /** Almacén en memoria de refresh tokens válidos.
+   *  En producción considera moverlos a Redis o a la BD. */
+  private refreshTokensValidos = new Set<string>();
 
-    private refreshTokens: string[] = [];
-    
-    login(rut: string, contraseña: string) {
-        try {
-            if (rut === "admin" && contraseña === "admin") {
-              const token = jwt.sign({ rut }, process.env.SECRET_KEY!, { expiresIn: "15m" });
-              const refreshToken = jwt.sign({ rut }, process.env.REFRESH_SECRET_KEY!, { expiresIn: "7d" });
-              this.refreshTokens.push(refreshToken);
-              return { ok: true, token, refreshToken };
-            }
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService,
+    private usuariosService: UsuariosService,
+  ) {}
 
-            const usuario = this.usuarios.find(u => u.rut === rut);
-            if (!usuario) return { ok: false };
-    
-            const match = bcrypt.compareSync(contraseña, usuario.pwdHash);
-            if (!match) return { ok: false };
-    
-            const token = jwt.sign({ rut }, process.env.SECRET_KEY!, { expiresIn: "15m" });
-            const refreshToken = jwt.sign({ rut }, process.env.REFRESH_SECRET_KEY!, { expiresIn: "7d" });
-    
-            this.refreshTokens.push(refreshToken);
-    
-            return { ok: true, token, refreshToken };
+  // ─── Tokens ──────────────────────────────────────────────────────────────
 
-        } catch (error) {
-            console.error('Login error:', error);
-            return { ok: false, mensaje: 'Error interno' };
-        }
+  private generarTokens(usuario: Usuario): Tokens {
+    const payload = { sub: usuario.id, email: usuario.email, rol: usuario.rol };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.getOrThrow('SECRET_KEY'),
+      expiresIn: '15m',
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.getOrThrow('REFRESH_SECRET_KEY'),
+      expiresIn: '7d',
+    });
+
+    this.refreshTokensValidos.add(refreshToken);
+    return { accessToken, refreshToken };
+  }
+
+  // ─── Flujos de autenticación ──────────────────────────────────────────────
+
+  /** Llamado después de que LocalStrategy valide las credenciales. */
+  login(usuario: Usuario): Tokens {
+    return this.generarTokens(usuario);
+  }
+
+  /** Registro de un nuevo usuario local. */
+  async register(dto: CreateUsuarioDto): Promise<{ usuario: any } & Tokens> {
+    const nuevo = await this.usuariosService.crear(dto);
+    const tokens = this.generarTokens(nuevo);
+    return { usuario: this.usuariosService.perfilPublico(nuevo), ...tokens };
+  }
+
+  /** Llamado después de que GoogleStrategy autentique al usuario. */
+  loginGoogle(usuario: Usuario): Tokens {
+    return this.generarTokens(usuario);
+  }
+
+  /** Renueva el access token usando el refresh token. */
+  refresh(token: string): { accessToken: string } | { ok: false } {
+    if (!this.refreshTokensValidos.has(token)) return { ok: false };
+
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.getOrThrow('REFRESH_SECRET_KEY'),
+      });
+      const newAccess = this.jwtService.sign(
+        { sub: payload.sub, email: payload.email, rol: payload.rol },
+        {
+          secret: this.configService.getOrThrow('SECRET_KEY'),
+          expiresIn: '15m',
+        },
+      );
+      return { accessToken: newAccess };
+    } catch {
+      this.refreshTokensValidos.delete(token);
+      return { ok: false };
     }
+  }
 
-    refresh(token: string) {
-        if (!this.refreshTokens.includes(token)) {
-            return { ok: false };
-        }
+  /** Revoca el refresh token (logout). */
+  logout(token: string): { ok: true } {
+    this.refreshTokensValidos.delete(token);
+    return { ok: true };
+  }
 
-        try {
-            const user: any = jwt.verify(token, process.env.REFRESH_SECRET_KEY!);
-            const newToken = jwt.sign({ rut: user.rut }, process.env.SECRET_KEY!, { expiresIn: "15m" });
-
-            return { ok: true, token: newToken };
-        } catch {
-            return { ok: false };
-        }
-    }
-
-    logout(token: string) {
-        this.refreshTokens = this.refreshTokens.filter(t => t !== token);
-        return { ok: true };
-    }
+  perfilPublico(usuario: Usuario) {
+    return this.usuariosService.perfilPublico(usuario);
+  }
 }
