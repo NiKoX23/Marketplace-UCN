@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { Usuario } from './usuarios/usuario.entity';
+import { PublicacionesModule } from './publicaciones/publicaciones.module';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { Usuario } from './usuarios/usuario.entity';
         username: config.getOrThrow<string>('DB_USER'),
         password: config.getOrThrow<string>('DB_PASS'),
         database: config.getOrThrow<string>('DB_NAME'),
-        entities: [Usuario],
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
         // synchronize: true crea/actualiza las tablas automáticamente.
         // Cámbialo a false en producción y usa migraciones.
         synchronize: true,
@@ -37,6 +38,7 @@ import { Usuario } from './usuarios/usuario.entity';
     UsuariosModule,
     AuthModule,
     ChatModule,
+    PublicacionesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

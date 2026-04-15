@@ -24,7 +24,7 @@ export class AuthService {
   // ─── Tokens ──────────────────────────────────────────────────────────────
 
   private generarTokens(usuario: Usuario): Tokens {
-    const payload = { sub: usuario.id, email: usuario.email, rol: usuario.rol };
+    const payload = { sub: usuario.id, email: usuario.email, rol: usuario.rol, rut: usuario.rut };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.getOrThrow('SECRET_KEY'),

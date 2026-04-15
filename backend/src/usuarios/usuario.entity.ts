@@ -15,45 +15,45 @@ export enum Rol {
 @Entity('usuarios')
 export class Usuario {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
 
   @Index({ unique: true, where: '"rut" IS NOT NULL' })
   @Column({ nullable: true, type: 'varchar', length: 12 })
-  rut: string | null;
+  rut!: string | null;
 
   @Column({ length: 100 })
-  nombre: string;
+  nombre!: string;
 
   @Column({ length: 100 })
-  apellido: string;
+  apellido!: string;
 
   @Index({ unique: true })
   @Column({ unique: true, length: 150 })
-  email: string;
+  email!: string;
 
   /**
    * Hash bcrypt de la contraseña.
    * NULL cuando el usuario se autentica exclusivamente con Google OAuth.
    */
   @Column({ nullable: true, type: 'varchar' })
-  passwordHash: string | null;
+  passwordHash!: string | null;
 
   /**
    * ID de Google cuando el usuario inicia sesión con OAuth.
    */
   @Index({ unique: true, where: '"googleId" IS NOT NULL' })
   @Column({ nullable: true, type: 'varchar' })
-  googleId: string | null;
+  googleId!: string | null;
 
   @Column({ type: 'enum', enum: Rol, default: Rol.USER })
-  rol: Rol;
+  rol!: Rol;
 
   @Column({ default: true })
-  activo: boolean;
+  activo!: boolean;
 
   @CreateDateColumn()
-  creadoEn: Date;
+  creadoEn!: Date;
 
   @UpdateDateColumn()
-  actualizadoEn: Date;
+  actualizadoEn!: Date;
 }

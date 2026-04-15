@@ -10,7 +10,7 @@ const API = "http://localhost:3000/auth";
 
 function Login() {
   const [mostrarContraseña, setMostrarContraseña] = useState(false);
-  const [identificador, setIdentificador] = useState(""); // RUT o email
+  const [identificador, setIdentificador] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -43,7 +43,6 @@ function Login() {
   };
 
   const loginGoogle = () => {
-    // Redirige al backend que inicia el flujo OAuth con Google
     window.location.href = `${API}/google`;
   };
 
