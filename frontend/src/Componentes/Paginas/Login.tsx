@@ -1,10 +1,10 @@
-import LogoGoogle from "../assets/LogoGoogle.png";
+import LogoGoogle from "../../assets/LogoGoogle.png";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Divider } from "primereact/divider";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import "../Css/Login.css";
+import "../../Styles/Login.css";
 
 const API = "http://localhost:3000/auth";
 

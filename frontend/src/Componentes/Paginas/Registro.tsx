@@ -2,8 +2,8 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import "../Css/Login.css";
-import "../Css/Registro.css";
+import "../../Styles/Login.css";
+import "../../Styles/Registro.css";
 
 const API = "http://localhost:3000/auth";
 

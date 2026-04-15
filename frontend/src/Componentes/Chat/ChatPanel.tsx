@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
-import "../Css/ChatPanel.css";
+import "../../Styles/ChatPanel.css";
 
 interface Message {
   id: string;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import "../Css/AdminPanel.css";
+import "../../Styles/AdminPanel.css";
 
 interface Message {
   id: string;
