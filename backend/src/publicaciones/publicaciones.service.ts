@@ -11,7 +11,7 @@ export class PublicacionesService {
         private repo: Repository<Publicacion>,
     ) {}
 
-    findAll() { return this.repo.find({ order: { creadoEn: "DESC" }}); }
+    findAll() { return this.repo.find({ order: { creadoEn: "DESC" }, relations: ['usuario'] }); }
 
     async crearPublicacion(
         file: any,

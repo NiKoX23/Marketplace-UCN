@@ -38,11 +38,19 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() body: any) {
-    if (!body.nombre || !body.apellido || !body.email || !body.password) {
+    if (!body.nombre || !body.apellido || !body.email || !body.password || !body.username) {
       throw new BadRequestException('Faltan campos obligatorios');
     }
+    
+    // Ensure username starts with @
+    let finalUsername = body.username.trim();
+    if (!finalUsername.startsWith('@')) {
+      finalUsername = '@' + finalUsername;
+    }
+
     try {
       const result = await this.authService.register({
+        username: finalUsername,
         nombre: body.nombre,
         apellido: body.apellido,
         email: body.email,

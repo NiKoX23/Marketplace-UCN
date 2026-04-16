@@ -24,7 +24,7 @@ export class AuthService {
   // ─── Tokens ──────────────────────────────────────────────────────────────
 
   private generarTokens(usuario: Usuario): Tokens {
-    const payload = { sub: usuario.id, email: usuario.email, rol: usuario.rol, rut: usuario.rut };
+    const payload = { sub: usuario.id, email: usuario.email, rol: usuario.rol, rut: usuario.rut, username: usuario.username };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.getOrThrow('SECRET_KEY'),
@@ -68,7 +68,7 @@ export class AuthService {
         secret: this.configService.getOrThrow('REFRESH_SECRET_KEY'),
       });
       const newAccess = this.jwtService.sign(
-        { sub: payload.sub, email: payload.email, rol: payload.rol },
+        { sub: payload.sub, email: payload.email, rol: payload.rol, username: payload.username },
         {
           secret: this.configService.getOrThrow('SECRET_KEY'),
           expiresIn: '15m',

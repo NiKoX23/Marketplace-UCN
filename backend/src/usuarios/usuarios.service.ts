@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 const SALT_ROUNDS = 12;
 
 export interface CreateUsuarioDto {
+  username?: string;
   nombre: string;
   apellido: string;
   email: string;
@@ -29,6 +30,11 @@ export class UsuariosService {
   /** Busca por email */
   async findByEmail(email: string): Promise<Usuario | null> {
     return this.repo.findOne({ where: { email } });
+  }
+
+  /** Busca por username */
+  async findByUsername(username: string): Promise<Usuario | null> {
+    return this.repo.findOne({ where: { username } });
   }
 
   /** Busca por RUT */
@@ -57,6 +63,14 @@ export class UsuariosService {
       throw new ConflictException('El email ya está registrado');
     }
 
+    // Verificar unicidad de username si se provee
+    if (dto.username) {
+      const existenteUsername = await this.findByUsername(dto.username);
+      if (existenteUsername) {
+        throw new ConflictException('El nombre de usuario ya está en uso');
+      }
+    }
+
     // Verificar unicidad de RUT si se provee
     if (dto.rut) {
       const existenteRut = await this.findByRut(dto.rut);
@@ -66,6 +80,7 @@ export class UsuariosService {
     }
 
     const usuario = this.repo.create({
+      username: dto.username ?? null,
       nombre: dto.nombre,
       apellido: dto.apellido,
       email: dto.email,
@@ -101,7 +116,13 @@ export class UsuariosService {
     }
 
     // 3) Crear usuario nuevo
+    // Generamos un username temporal para los usuarios de Google
+    const baseUsername = `@${profile.nombre.toLowerCase().replace(/\s+/g, '')}`;
+    const randomSuffix = Math.floor(Math.random() * 10000);
+    const tempUsername = `${baseUsername}_${randomSuffix}`;
+
     return this.crear({
+      username: tempUsername,
       googleId: profile.googleId,
       email: profile.email,
       nombre: profile.nombre,

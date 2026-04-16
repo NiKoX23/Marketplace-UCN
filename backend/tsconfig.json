@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "isolatedModules": true,
     "declaration": true,
-    "types": ["node", "jest", "passport-jwt", "passport-local", "mocha"],
+    "types": [
+      "node",
+      "jest"
+    ],
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,

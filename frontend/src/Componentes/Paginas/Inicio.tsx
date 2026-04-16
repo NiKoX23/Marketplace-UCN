@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ChatPanel from "../Chat/ChatPanel";
+import PerfilPanel from "../Perfil/PerfilPanel";
 import AdminPanel from "../Admin/AdminPanel";
 import Publicaciones from "../Publicaciones/Publicaciones";
 import "../../Styles/BarraLateral.css";
@@ -53,6 +54,7 @@ function Inicio() {
             </header>
 
             <ChatPanel isOpen={abrirChat} onClose={() => setAbrirChat(false)} />
+            <PerfilPanel isOpen={abrirPerfil} onClose={() => setAbrirPerfil(false)} />
 
             <main style={{ padding: "80px 20px 20px" }}>
                 <h2 style={{color: "white"}}>Bienvenido al Marketplace</h2>

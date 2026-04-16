@@ -9,6 +9,7 @@ interface Publicacion {
     fileUrl: string;
     fileName: string;
     usuarioId: string;
+    usuario?: { username: string };
     creadoEn: string;
 }
 
@@ -52,7 +53,7 @@ function Publicaciones() {
                                 </a>
                             </p>
 
-                            <p style={{fontSize: "12px", opacity:"0.7"}}>Usuario: {pub.usuarioId}</p>
+                            <p style={{fontSize: "14px", fontWeight: "bold", color: "#a78bfa"}}>Usuario: {pub.usuario?.username || pub.usuarioId}</p>
                             <p style={{fontSize: "12px", opacity:"0.5"}}>{new Date(pub.creadoEn).toLocaleDateString()}</p>
                         </div>
                     ))}

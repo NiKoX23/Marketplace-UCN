@@ -9,6 +9,7 @@ const API = "http://localhost:3000/auth";
 
 function Registro() {
   const [form, setForm] = useState({
+    username: "",
     nombre: "",
     apellido: "",
     rut: "",
@@ -28,7 +29,7 @@ function Registro() {
   };
 
   const validar = (): boolean => {
-    if (!form.nombre || !form.apellido || !form.email || !form.password) {
+    if (!form.username || !form.nombre || !form.apellido || !form.email || !form.password) {
       setError("Por favor completa todos los campos obligatorios.");
       return false;
     }
@@ -58,6 +59,7 @@ function Registro() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          username: form.username,
           nombre: form.nombre,
           apellido: form.apellido,
           email: form.email,
@@ -100,6 +102,14 @@ function Registro() {
             </div>
           ) : (
             <form onSubmit={registrar}>
+              <InputText
+                className="input"
+                placeholder="Nombre de Usuario (ej. @usuario_01) *"
+                value={form.username}
+                onChange={(e) => onChange("username", e.target.value)}
+                required
+              />
+
               <div className="fila-doble">
                 <InputText
                   className="input"

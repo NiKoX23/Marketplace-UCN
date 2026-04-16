@@ -45,19 +45,19 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const getRutFromToken = () => {
+  const getUsernameFromToken = () => {
     const token = localStorage.getItem("accessToken");
     if (!token) return "Invitado";
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.rut || "Anon";
+      return payload.username || payload.rut || "Anon";
     } catch {
       return "Invitado";
     }
   };
 
-  const userRut = getRutFromToken();
-  const isAdmin = userRut === "admin";
+  const activeUser = getUsernameFromToken();
+  const isAdmin = activeUser === "admin" || (activeUser && activeUser.includes("admin"));
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -69,23 +69,23 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
       setSocket(newSocket);
 
       newSocket.on("connect", () => {
-        newSocket.emit("register", { rut: userRut });
-        newSocket.emit("getPrivateChats", { rut: userRut });
-        newSocket.emit("getTickets", { rut: userRut, isAdmin });
+        newSocket.emit("register", { rut: activeUser });
+        newSocket.emit("getPrivateChats", { rut: activeUser });
+        newSocket.emit("getTickets", { rut: activeUser, isAdmin });
       });
 
       newSocket.on("privateChatsList", (chats: PrivateChat[]) => setPrivateChats(chats));
-      newSocket.on("privateMessage", () => newSocket.emit("getPrivateChats", { rut: userRut }));
+      newSocket.on("privateMessage", () => newSocket.emit("getPrivateChats", { rut: activeUser }));
 
       newSocket.on("ticketsList", (tkts: Ticket[]) => setTickets(tkts));
-      newSocket.on("ticketsUpdated", () => newSocket.emit("getTickets", { rut: userRut, isAdmin }));
-      newSocket.on("ticketReplied", () => newSocket.emit("getTickets", { rut: userRut, isAdmin }));
+      newSocket.on("ticketsUpdated", () => newSocket.emit("getTickets", { rut: activeUser, isAdmin }));
+      newSocket.on("ticketReplied", () => newSocket.emit("getTickets", { rut: activeUser, isAdmin }));
 
       return () => {
         newSocket.disconnect();
       };
     }
-  }, [isOpen, userRut, isAdmin]);
+  }, [isOpen, activeUser, isAdmin]);
 
   useEffect(() => {
     scrollToBottom();
@@ -94,14 +94,16 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
   // --- DM Handlers ---
   const handleSendDM = () => {
     if (msgInput.trim() && selectedChatUser && socket) {
-      socket.emit("sendPrivateMessage", { sender: userRut, receiver: selectedChatUser, text: msgInput });
+      socket.emit("sendPrivateMessage", { sender: activeUser, receiver: selectedChatUser, text: msgInput });
       setMsgInput("");
     }
   };
 
   const handleStartNewChat = () => {
-    if (newChatInput.trim() && newChatInput !== userRut) {
-      setSelectedChatUser(newChatInput.trim());
+    if (newChatInput.trim() && newChatInput !== activeUser) {
+      let finalTarget = newChatInput.trim();
+      if (!finalTarget.startsWith('@')) finalTarget = '@' + finalTarget;
+      setSelectedChatUser(finalTarget);
       setNewChatInput("");
     }
   };
@@ -109,7 +111,7 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
   // --- Ticket Handlers ---
   const handleCreateTicket = () => {
     if (newTicketTitle.trim() && newTicketText.trim() && socket) {
-      socket.emit("createTicket", { creator: userRut, title: newTicketTitle, text: newTicketText });
+      socket.emit("createTicket", { creator: activeUser, title: newTicketTitle, text: newTicketText });
       setNewTicketTitle("");
       setNewTicketText("");
       setIsCreatingTicket(false);
@@ -118,7 +120,7 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
 
   const handleReplyTicket = () => {
     if (replyInput.trim() && selectedTicketId && socket) {
-      socket.emit("replyTicket", { ticketId: selectedTicketId, sender: userRut, text: replyInput });
+      socket.emit("replyTicket", { ticketId: selectedTicketId, sender: activeUser, text: replyInput });
       setReplyInput("");
     }
   };
@@ -129,12 +131,12 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
   const renderDMList = () => (
     <div className="list-container">
       <div className="new-chat">
-        <InputText value={newChatInput} onChange={(e) => setNewChatInput(e.target.value)} placeholder="RUT usuario..." />
+        <InputText value={newChatInput} onChange={(e) => setNewChatInput(e.target.value)} placeholder="Tag amigo (ej: @juan)..." />
         <Button icon="pi pi-plus" onClick={handleStartNewChat} className="p-button-rounded" />
       </div>
       <div className="chats-list">
         {privateChats.map((c, i) => {
-          const otherUser = c.participants.find((p) => p !== userRut) || userRut;
+          const otherUser = c.participants.find((p) => p !== activeUser) || activeUser;
           const lastMsg = c.messages[c.messages.length - 1];
           return (
             <div key={i} className="list-item" onClick={() => setSelectedChatUser(otherUser)}>
@@ -160,7 +162,7 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
         </div>
         <div className="messages-container">
           {messages.map((msg) => (
-            <div key={msg.id} className={`message ${msg.sender === userRut ? "sent" : "received"}`}>
+            <div key={msg.id} className={`message ${msg.sender === activeUser ? "sent" : "received"}`}>
               <div className="message-bubble">
                 <p>{msg.text}</p>
                 <span className="timestamp">{msg.timestamp}</span>
@@ -226,8 +228,8 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
         </div>
         <div className="messages-container">
           {ticket.messages.map((msg) => (
-            <div key={msg.id} className={`message ${msg.sender === userRut ? "sent" : "received"}`}>
-              <span className="sender">{msg.sender === "admin" ? "Soporte" : msg.sender}</span>
+            <div key={msg.id} className={`message ${msg.sender === activeUser ? "sent" : "received"}`}>
+              <span className="sender">{msg.sender.includes("admin") ? "Soporte" : msg.sender}</span>
               <div className="message-bubble">
                 <p>{msg.text}</p>
                 <span className="timestamp">{msg.timestamp}</span>

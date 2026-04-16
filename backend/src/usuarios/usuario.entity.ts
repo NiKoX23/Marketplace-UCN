@@ -21,6 +21,10 @@ export class Usuario {
   @Column({ nullable: true, type: 'varchar', length: 12 })
   rut!: string | null;
 
+  @Index({ unique: true, where: '"username" IS NOT NULL' })
+  @Column({ nullable: true, type: 'varchar', length: 50 })
+  username!: string | null;
+
   @Column({ length: 100 })
   nombre!: string;
 
