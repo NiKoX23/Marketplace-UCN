@@ -103,6 +103,9 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
     if (newChatInput.trim() && newChatInput !== activeUser) {
       let finalTarget = newChatInput.trim();
       if (!finalTarget.startsWith('@')) finalTarget = '@' + finalTarget;
+      if (socket) {
+        socket.emit("startPrivateChat", { sender: activeUser, receiver: finalTarget });
+      }
       setSelectedChatUser(finalTarget);
       setNewChatInput("");
     }
