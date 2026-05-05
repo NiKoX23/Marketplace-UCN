@@ -1,6 +1,8 @@
 node_modules/
 **/node_modules
 
+postgresData/
+**/postgresData/
 dist/
 dist-ssr/
 dist
