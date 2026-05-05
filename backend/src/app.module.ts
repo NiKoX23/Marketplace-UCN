@@ -21,13 +21,11 @@ import { PublicacionesModule } from './publicaciones/publicaciones.module';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         host: config.get<string>('DB_HOST', 'postgres'),
-        port: config.get<number>('DB_PORT', 5432),
+        port: parseInt(config.get<string>('DB_PORT','5432'),10),
         username: config.getOrThrow<string>('DB_USER'),
         password: config.getOrThrow<string>('DB_PASS'),
         database: config.getOrThrow<string>('DB_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        // synchronize: true crea/actualiza las tablas automáticamente.
-        // Cámbialo a false en producción y usa migraciones.
         synchronize: true,
         logging: config.get('NODE_ENV') !== 'production',
         retryAttempts: 10,

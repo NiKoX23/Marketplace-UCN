@@ -8,12 +8,10 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-  ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard, JwtAuthGuard, GoogleAuthGuard } from './guards/auth.guards';
+import { JwtAuthGuard, GoogleAuthGuard } from './guards/auth.guards';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
@@ -23,46 +21,6 @@ export class AuthController {
     private configService: ConfigService,
   ) {}
 
-  // ─── Login local (RUT o email + password) ───────────────────────────────
-
-  @UseGuards(LocalAuthGuard)
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  login(@Req() req: any) {
-    const tokens = this.authService.login(req.user);
-    return { ok: true, ...tokens };
-  }
-
-  // ─── Registro ────────────────────────────────────────────────────────────
-
-  @Post('register')
-  @HttpCode(HttpStatus.CREATED)
-  async register(@Body() body: any) {
-    if (!body.nombre || !body.apellido || !body.email || !body.password || !body.username) {
-      throw new BadRequestException('Faltan campos obligatorios');
-    }
-    
-    // Ensure username starts with @
-    let finalUsername = body.username.trim();
-    if (!finalUsername.startsWith('@')) {
-      finalUsername = '@' + finalUsername;
-    }
-
-    try {
-      const result = await this.authService.register({
-        username: finalUsername,
-        nombre: body.nombre,
-        apellido: body.apellido,
-        email: body.email,
-        rut: body.rut,
-        password: body.password,
-      });
-      return { ok: true, ...result };
-    } catch (err) {
-      if (err instanceof ConflictException) throw err;
-      throw new BadRequestException('Error al registrar usuario');
-    }
-  }
 
   // ─── Refresh token ───────────────────────────────────────────────────────
 
@@ -100,8 +58,9 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
   googleCallback(@Req() req: any, @Res() res: Response) {
-    const tokens = this.authService.loginGoogle(req.user);
     const frontendUrl = this.configService.get('FRONTEND_URL', 'http://localhost:5173');
+    if(!req.user) { return res.redirect(`${frontendUrl}/?error=dominio_no_permitido`)}
+    const tokens = this.authService.loginGoogle(req.user);
 
     // Redirect HTTP 302 real → el navegador va al frontend con los tokens en la URL
     const redirectUrl = `${frontendUrl}/auth/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`;

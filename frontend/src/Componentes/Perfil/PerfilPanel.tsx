@@ -45,7 +45,7 @@ const PerfilPanel: React.FC<PerfilPanelProps> = ({ isOpen, onClose }) => {
             <div className={`perfil-lateral ${isOpen ? "activa" : ""}`}>
                 <div className="perfil-header">
                     <h2>Mi Perfil</h2>
-                    <Button icon="pi pi-times" className="p-button-rounded p-button-text close-btn" onClick={onClose} style={{color: "white"}}/>
+                    <Button icon="pi pi-times" className="close-btn" onClick={onClose} />
                 </div>
                 
                 <div className="perfil-content">
@@ -66,9 +66,18 @@ const PerfilPanel: React.FC<PerfilPanelProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="perfil-acciones">
-                    <Button label="Volver a Inicio" icon="pi pi-home" className="p-button-outlined action-btn p-button-info" onClick={() => { navigate("/inicio"); onClose(); }} />
-                    <Button label="Configuración" icon="pi pi-cog" className="p-button-outlined action-btn" />
-                    <Button label="Cerrar Sesión" icon="pi pi-sign-out" className="p-button-danger action-btn" onClick={handleCerrarSesion} />
+                    <Button label="Volver a Inicio"
+                            icon="pi pi-home" 
+                            className="action-btn"
+                            onClick={() => { navigate("/inicio"); onClose(); }} />
+
+                    <Button label="Configuración"
+                            icon="pi pi-cog" 
+                            className="action-btn" />
+                    <Button label="Cerrar Sesión" 
+                            icon="pi pi-sign-out" 
+                            className="action-btn logout" 
+                            onClick={handleCerrarSesion} />
                 </div>
             </div>
         </>

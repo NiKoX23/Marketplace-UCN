@@ -91,6 +91,14 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
     scrollToBottom();
   }, [privateChats, tickets, selectedChatUser, selectedTicketId]);
 
+  useEffect(() => {
+    if(isOpen){ document.body.classList.add("chat-open"); }
+    else { document.body.classList.remove("chat-open"); }
+
+    return () => { document.body.classList.remove("chat-open");};
+
+  }, [isOpen]);
+
   // --- DM Handlers ---
   const handleSendDM = () => {
     if (msgInput.trim() && selectedChatUser && socket) {

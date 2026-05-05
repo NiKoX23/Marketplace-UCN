@@ -13,6 +13,11 @@ function AuthCallback() {
   useEffect(() => {
     const accessToken = params.get("accessToken");
     const refreshToken = params.get("refreshToken");
+    const error = params.get("error");
+
+    if(error){
+      navigate(`/?error=${error}`, {replace: true});
+    }
 
     if (accessToken && refreshToken) {
       localStorage.setItem("accessToken", accessToken);

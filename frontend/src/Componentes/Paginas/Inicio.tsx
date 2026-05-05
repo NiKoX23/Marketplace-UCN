@@ -36,7 +36,7 @@ function Inicio() {
                 </div>
 
                 <div className="derecha" style={{ display: "flex", gap: "10px" }}>
-                    <button className={`botonSubirArchivo ${abrirChat ? "activo" : ""}`} onClick={() => navigate("/subirArchivo")}>
+                    <button className={"botonSubirArchivo"} onClick={() => navigate("/subirArchivo")}>
                         <i className="pi pi-upload" style={{ fontSize: "1.5rem" }}></i>
                         <p style={{color:"#ebebeb"}}>Subir Archivo</p>
                     </button>
@@ -53,6 +53,11 @@ function Inicio() {
                 </div>
             </header>
 
+            {abrirChat && (
+                <div className="chat-overlay"
+                     onClick={() => setAbrirChat(false)}
+                />
+            )}
             <ChatPanel isOpen={abrirChat} onClose={() => setAbrirChat(false)} />
             <PerfilPanel isOpen={abrirPerfil} onClose={() => setAbrirPerfil(false)} />
 

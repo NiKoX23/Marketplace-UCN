@@ -24,11 +24,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback,
   ) {
+    const dominiosPermitidos =['@alumnos.ucn.cl', '@ucn.cl', '@ce.ucn.cl'];
     const { id, emails, name } = profile;
     const email = emails?.[0]?.value ?? '';
     const nombre = name?.givenName ?? '';
     const apellido = name?.familyName ?? '';
 
+    const esValido = dominiosPermitidos.some(dom => email.endsWith(dom));
+    if(!esValido){ return done(null,false) }
     try {
       const usuario = await this.usuariosService.findOrCreateGoogle({
         googleId: id,

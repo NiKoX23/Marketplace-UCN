@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Publicaciones from "./Publicaciones";
 import "../../Styles/SubirArchivo.css";
 
 function SubirArchivo() {
@@ -44,7 +43,7 @@ function SubirArchivo() {
     };
 
     return (
-        <div>
+        <div className="container-subir-archivo">
             <form onSubmit={handleUpload} style={{marginBottom: "30px"}}>
                 <input 
                     placeholder="Título"
