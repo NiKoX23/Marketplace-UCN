@@ -271,8 +271,9 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
             Soporte
           </button>
         </div>
-        <Button icon="pi pi-times" className="p-button-rounded p-button-text close-btn" onClick={onClose} />
       </div>
+      
+      <Button icon="pi pi-times" className="p-button-rounded p-button-text close-btn" onClick={onClose} />
 
       <div className="chat-body">
         {activeTab === "dms" && (selectedChatUser ? renderDMChat() : renderDMList())}

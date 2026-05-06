@@ -29,7 +29,7 @@ function Inicio() {
         <div className="inicio">
             <header className="headerBarraLateral">
                 <div className="izquierda">
-                    <button className="botonMenu" onClick={() => setAbrirBarra(!abrirBarra)}> 
+                    <button disabled={abrirChat} className="botonMenu" onClick={() => setAbrirBarra(!abrirBarra)}> 
                         <i className="pi pi-bars" style={{ fontSize: "1.25rem" }}></i>
                         <p style={{color:"#ebebeb"}}>Servidores</p>
                     </button>
@@ -41,12 +41,12 @@ function Inicio() {
                         <p style={{color:"#ebebeb"}}>Subir Archivo</p>
                     </button>
                     
-                    <button className={`botonChat ${abrirChat ? "activo" : ""}`} onClick={() => setAbrirChat(!abrirChat)}> 
+                    <button disabled={abrirPerfil} className={`botonChat ${abrirChat ? "activo" : ""}`} onClick={() => setAbrirChat(!abrirChat)}> 
                         <i className="pi pi-comments" style={{ fontSize: "1.5rem" }}></i>
                         <p style={{color:"#ebebeb"}}>Chat</p>
                     </button>
 
-                    <button className={`botonPerfil ${abrirPerfil ? "activo" : ""}`} onClick={() => setAbrirPerfil(!abrirPerfil)}> 
+                    <button disabled={abrirChat} className={`botonPerfil ${abrirPerfil ? "activo" : ""}`} onClick={() => setAbrirPerfil(!abrirPerfil)}> 
                         <i className="pi pi-user" style={{ fontSize: "1.5rem" }}></i>
                         <p style={{color:"#ebebeb"}}>Perfil</p>
                     </button>
@@ -54,11 +54,13 @@ function Inicio() {
             </header>
 
             {abrirChat && (
-                <div className="chat-overlay"
-                     onClick={() => setAbrirChat(false)}
-                />
+                <>
+                    <div className="chat-overlay" onClick={() => setAbrirChat(false)}/>
+                    <ChatPanel isOpen={abrirChat} onClose={() => setAbrirChat(false)}/>
+                </>
+                
             )}
-            <ChatPanel isOpen={abrirChat} onClose={() => setAbrirChat(false)} />
+
             <PerfilPanel isOpen={abrirPerfil} onClose={() => setAbrirPerfil(false)} />
 
             <main style={{ padding: "80px 20px 20px" }}>
