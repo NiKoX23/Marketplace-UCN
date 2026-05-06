@@ -142,7 +142,10 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
   const renderDMList = () => (
     <div className="list-container">
       <div className="new-chat">
-        <InputText value={newChatInput} onChange={(e) => setNewChatInput(e.target.value)} placeholder="Tag amigo (ej: @juan)..." />
+        <InputText value={newChatInput} 
+                   onChange={(e) => setNewChatInput(e.target.value)}
+                   onKeyDown={(e) => e.key === "Enter" && handleStartNewChat()}
+                   placeholder="Tag amigo (ej: @juan)..." />
         <Button icon="pi pi-plus" onClick={handleStartNewChat} className="p-button-rounded" />
       </div>
       <div className="chats-list">
