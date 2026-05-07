@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Usuario } from './usuario.entity';
+import { Usuario, Rol } from './usuario.entity';
 import * as bcrypt from 'bcrypt';
 
 const SALT_ROUNDS = 12;
@@ -18,6 +18,7 @@ export interface CreateUsuarioDto {
   rut?: string;
   password?: string;
   googleId?: string;
+  rol? : Rol;
 }
 
 @Injectable()
@@ -89,6 +90,7 @@ export class UsuariosService {
         ? await bcrypt.hash(dto.password, SALT_ROUNDS)
         : null,
       googleId: dto.googleId ?? null,
+      rol: dto.rol ?? Rol.USER,
     });
 
     return this.repo.save(usuario);
@@ -103,6 +105,7 @@ export class UsuariosService {
     email: string;
     nombre: string;
     apellido: string;
+    rol: Rol;
   }): Promise<Usuario> {
     // 1) ¿Ya existe por googleId?
     let usuario = await this.findByGoogleId(profile.googleId);
@@ -112,6 +115,7 @@ export class UsuariosService {
     usuario = await this.findByEmail(profile.email);
     if (usuario) {
       usuario.googleId = profile.googleId;
+      usuario.rol = profile.rol;
       return this.repo.save(usuario);
     }
 
@@ -127,6 +131,7 @@ export class UsuariosService {
       email: profile.email,
       nombre: profile.nombre,
       apellido: profile.apellido,
+      rol: profile.rol,
     });
   }
 

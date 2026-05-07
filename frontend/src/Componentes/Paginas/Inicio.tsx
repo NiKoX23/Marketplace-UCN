@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ChatPanel from "../Chat/ChatPanel";
 import PerfilPanel from "../Perfil/PerfilPanel";
-import AdminPanel from "../Admin/AdminPanel";
 import Publicaciones from "../Publicaciones/Publicaciones";
-import "../../Styles/BarraLateral.css";
+import "../../Styles/Inicio.css";
 import "primeicons/primeicons.css";
 
 function Inicio() {
@@ -12,18 +11,18 @@ function Inicio() {
     const [abrirPerfil, setAbrirPerfil] = useState(false);
     const [abrirChat, setAbrirChat] = useState(false);
     const navigate = useNavigate();
-    const getRutFromToken = () => {
+    const getPayloadFromToken = () => {
         const token = localStorage.getItem("accessToken");
         if (!token) return null;
         try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            return payload.rut ?? payload.email ?? "desconocido";
+            return JSON.parse(atob(token.split(".")[1]));
         } catch {
             return null;
         }
     };
 
-    const isAdmin = getRutFromToken() === "admin";
+    const payload = getPayloadFromToken();
+    const isAdmin = payload?.rol === "admin";
     
     return (
         <div className="inicio">
@@ -46,6 +45,13 @@ function Inicio() {
                         <p style={{color:"#ebebeb"}}>Chat</p>
                     </button>
 
+                    {isAdmin && (
+                        <button disabled={abrirChat} className="botonAdmin" onClick={()=> navigate("/adminPanel")}>
+                            <i className="pi pi-shield" style={{fontSize: "1.5rem"}}></i>
+                            <p style={{color: "#ebebeb"}}>Perfil Admin</p>
+                        </button>
+                    )}
+
                     <button disabled={abrirChat} className={`botonPerfil ${abrirPerfil ? "activo" : ""}`} onClick={() => setAbrirPerfil(!abrirPerfil)}> 
                         <i className="pi pi-user" style={{ fontSize: "1.5rem" }}></i>
                         <p style={{color:"#ebebeb"}}>Perfil</p>
@@ -65,11 +71,7 @@ function Inicio() {
 
             <main style={{ padding: "80px 20px 20px" }}>
                 <h2 style={{color: "white"}}>Bienvenido al Marketplace</h2>
-                {isAdmin ? (
-                    <AdminPanel />
-                ): (
                     <Publicaciones />
-                )}
             </main>
                 <div className={`barra-lateral ${abrirBarra ? "activa" : ""}`}>
                     <h2>Canales</h2>

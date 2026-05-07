@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsuariosService } from '../../usuarios/usuarios.service';
+import { userInfo } from 'os';
 
 export interface JwtPayload {
   sub: string;   // user UUID
@@ -26,6 +27,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload) {
     const usuario = await this.usuariosService.findById(payload.sub);
     if (!usuario || !usuario.activo) return null;
-    return usuario;
+    return {
+      id: usuario.id,
+      email: usuario.email,
+      reol: usuario.rol,
+      username: usuario.username,
+    };
   }
 }

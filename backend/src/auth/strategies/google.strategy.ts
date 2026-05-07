@@ -3,11 +3,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { UsuariosService } from '../../usuarios/usuarios.service';
+import { Rol } from '../../usuarios/usuario.entity';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
-    configService: ConfigService,
+    private configService: ConfigService,
     private usuariosService: UsuariosService,
   ) {
     super({
@@ -23,14 +24,19 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _refreshToken: string,
     profile: any,
     done: VerifyCallback,
+
   ) {
-    const dominiosPermitidos =['@alumnos.ucn.cl', '@ucn.cl', '@ce.ucn.cl'];
+    const dominiosPermitidos = this.configService.get<string>('DOMINIOS')?.split(',').map(d=> d.trim()) || [] ;
+    const admins = this.configService.get<string>('ADMINS')?.split(',').map(a => a.trim()) || [] ;
     const { id, emails, name } = profile;
     const email = emails?.[0]?.value ?? '';
     const nombre = name?.givenName ?? '';
     const apellido = name?.familyName ?? '';
+    const dominio = email.split("@")[1];
+    const esValido = dominiosPermitidos.includes(dominio);
+    const esAdmin = admins.some(admin => admin.trim() === email);
+    const rol = esAdmin ? Rol.ADMIN : Rol.USER;
 
-    const esValido = dominiosPermitidos.some(dom => email.endsWith(dom));
     if(!esValido){ return done(null,false) }
     try {
       const usuario = await this.usuariosService.findOrCreateGoogle({
@@ -38,6 +44,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         email,
         nombre,
         apellido,
+        rol,
       });
       done(null, usuario);
     } catch (err) {

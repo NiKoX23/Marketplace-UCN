@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
+import { useNavigate } from "react-router-dom";
 import "../../Styles/AdminPanel.css";
 
 interface Message {
@@ -24,19 +25,34 @@ const AdminPanel: React.FC = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [expandedTicketId, setExpandedTicketId] = useState<string | null>(null);
   const [replyInputs, setReplyInputs] = useState<{ [key: string]: string }>({});
+  const navigate = useNavigate();
 
+  let userActual ="";
   useEffect(() => {
-    const newSocket = io("http://localhost:3000", { transports: ["websocket"] });
+    const token = localStorage.getItem("accessToken");
+
+    if(token){
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]))
+        userActual = payload.username || payload.email;
+
+      }catch {console.log("error payload")}
+    }
+    const newSocket = io("http://localhost:3000", { 
+      transports: ["websocket"],
+      auth: {
+        token,
+      },
+     });
     setSocket(newSocket);
 
     newSocket.on("connect", () => {
-      newSocket.emit("register", { rut: "admin" });
-      newSocket.emit("getTickets", { rut: "admin", isAdmin: true });
+      newSocket.emit("getTickets");
     });
 
     newSocket.on("ticketsList", (tkts: Ticket[]) => setTickets(tkts));
-    newSocket.on("ticketsUpdated", () => newSocket.emit("getTickets", { rut: "admin", isAdmin: true }));
-    newSocket.on("ticketReplied", () => newSocket.emit("getTickets", { rut: "admin", isAdmin: true }));
+    newSocket.on("ticketsUpdated", () => newSocket.emit("getTickets"));
+    newSocket.on("ticketReplied", () => newSocket.emit("getTickets"));
 
     return () => {
       newSocket.disconnect();
@@ -46,7 +62,7 @@ const AdminPanel: React.FC = () => {
   const handleReply = (ticketId: string) => {
     const text = replyInputs[ticketId];
     if (text?.trim() && socket) {
-      socket.emit("replyTicket", { ticketId, sender: "admin", text });
+      socket.emit("replyTicket", { ticketId, text });
       setReplyInputs({ ...replyInputs, [ticketId]: "" });
     }
   };
@@ -55,6 +71,7 @@ const AdminPanel: React.FC = () => {
     <div className="admin-panel">
       <div className="admin-header">
         <i className="pi pi-shield"></i>
+        <button onClick={() => navigate("/inicio")}>Volver a Inicio</button>
         <h2>Panel de Administración de Tickets</h2>
       </div>
 
@@ -83,8 +100,8 @@ const AdminPanel: React.FC = () => {
                 <div className="ticket-expanded">
                   <div className="admin-messages-list">
                     {t.messages.map((m) => (
-                      <div key={m.id} className={`admin-msg ${m.sender === "admin" ? "from-admin" : "from-user"}`}>
-                        <strong>{m.sender === "admin" ? "Tú (Soporte)" : m.sender}: </strong>
+                      <div key={m.id} className={`admin-msg ${m.sender === userActual ? "from-admin" : "from-user"}`}>
+                        <strong>{m.sender === userActual ? "Tú (Soporte)" : m.sender}: </strong>
                         <span>{m.text}</span>
                         <div className="admin-msg-time">{m.timestamp}</div>
                       </div>

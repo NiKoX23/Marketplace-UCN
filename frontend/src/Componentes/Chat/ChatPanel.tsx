@@ -25,17 +25,27 @@ interface Ticket {
   status: "open" | "closed";
 }
 
-const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+interface TokenPayload {
+  sub: string;
+  email: string;
+  rol: "admin" | "user";
+  username?: string;
+}
+
+const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
+  isOpen,
+  onClose,
+}) => {
   const [activeTab, setActiveTab] = useState<"dms" | "support">("dms");
   const [socket, setSocket] = useState<Socket | null>(null);
 
-  // States DMs
+  // DMs
   const [privateChats, setPrivateChats] = useState<PrivateChat[]>([]);
   const [selectedChatUser, setSelectedChatUser] = useState<string | null>(null);
   const [newChatInput, setNewChatInput] = useState("");
   const [msgInput, setMsgInput] = useState("");
 
-  // States Support
+  // Tickets
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [isCreatingTicket, setIsCreatingTicket] = useState(false);
@@ -45,119 +55,194 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const getUsernameFromToken = () => {
+  const getPayload = (): TokenPayload | null => {
     const token = localStorage.getItem("accessToken");
-    if (!token) return "Invitado";
+
+    if (!token) return null;
+
     try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      return payload.username || payload.rut || "Anon";
+      return JSON.parse(atob(token.split(".")[1]));
     } catch {
-      return "Invitado";
+      return null;
     }
   };
 
-  const activeUser = getUsernameFromToken();
-  const isAdmin = activeUser === "admin" || (activeUser && activeUser.includes("admin"));
+  const payload = getPayload();
+
+  const activeUser =
+    payload?.username ||
+    payload?.email ||
+    "Invitado";
+
+  const isAdmin = payload?.rol === "admin";
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
   };
 
   useEffect(() => {
-    if (isOpen) {
-      const newSocket = io("http://localhost:3000", { transports: ["websocket"] });
-      setSocket(newSocket);
+    if (!isOpen) return;
 
-      newSocket.on("connect", () => {
-        newSocket.emit("register", { rut: activeUser });
-        newSocket.emit("getPrivateChats", { rut: activeUser });
-        newSocket.emit("getTickets", { rut: activeUser, isAdmin });
-      });
+    const token = localStorage.getItem("accessToken");
 
-      newSocket.on("privateChatsList", (chats: PrivateChat[]) => setPrivateChats(chats));
-      newSocket.on("privateMessage", () => newSocket.emit("getPrivateChats", { rut: activeUser }));
+    const newSocket = io("http://localhost:3000", {
+      transports: ["websocket"],
+      auth: {
+        token,
+      },
+    });
 
-      newSocket.on("ticketsList", (tkts: Ticket[]) => setTickets(tkts));
-      newSocket.on("ticketsUpdated", () => newSocket.emit("getTickets", { rut: activeUser, isAdmin }));
-      newSocket.on("ticketReplied", () => newSocket.emit("getTickets", { rut: activeUser, isAdmin }));
+    setSocket(newSocket);
 
-      return () => {
-        newSocket.disconnect();
-      };
-    }
-  }, [isOpen, activeUser, isAdmin]);
+    newSocket.on("connect", () => {
+      newSocket.emit("getPrivateChats");
+      newSocket.emit("getTickets");
+    });
+
+    newSocket.on("privateChatsList", (chats: PrivateChat[]) => {
+      setPrivateChats(chats);
+    });
+
+    newSocket.on("privateMessage", () => {
+      newSocket.emit("getPrivateChats");
+    });
+
+    newSocket.on("ticketsList", (tkts: Ticket[]) => {
+      setTickets(tkts);
+    });
+
+    newSocket.on("ticketsUpdated", () => {
+      newSocket.emit("getTickets");
+    });
+
+    newSocket.on("ticketReplied", () => {
+      newSocket.emit("getTickets");
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     scrollToBottom();
   }, [privateChats, tickets, selectedChatUser, selectedTicketId]);
 
   useEffect(() => {
-    if(isOpen){ document.body.classList.add("chat-open"); }
-    else { document.body.classList.remove("chat-open"); }
+    if (isOpen) {
+      document.body.classList.add("chat-open");
+    } else {
+      document.body.classList.remove("chat-open");
+    }
 
-    return () => { document.body.classList.remove("chat-open");};
-
+    return () => {
+      document.body.classList.remove("chat-open");
+    };
   }, [isOpen]);
 
-  // --- DM Handlers ---
+  // ─── DMs ─────────────────────────────────────────
+
   const handleSendDM = () => {
-    if (msgInput.trim() && selectedChatUser && socket) {
-      socket.emit("sendPrivateMessage", { sender: activeUser, receiver: selectedChatUser, text: msgInput });
-      setMsgInput("");
-    }
+    if (!msgInput.trim() || !selectedChatUser || !socket) return;
+
+    socket.emit("sendPrivateMessage", {
+      receiver: selectedChatUser,
+      text: msgInput,
+    });
+
+    setMsgInput("");
   };
 
   const handleStartNewChat = () => {
-    if (newChatInput.trim() && newChatInput !== activeUser) {
-      let finalTarget = newChatInput.trim();
-      if (!finalTarget.startsWith('@')) finalTarget = '@' + finalTarget;
-      if (socket) {
-        socket.emit("startPrivateChat", { sender: activeUser, receiver: finalTarget });
-      }
-      setSelectedChatUser(finalTarget);
-      setNewChatInput("");
+    if (!newChatInput.trim() || newChatInput === activeUser) return;
+
+    let finalTarget = newChatInput.trim();
+
+    if (!finalTarget.startsWith("@")) {
+      finalTarget = "@" + finalTarget;
     }
+
+    socket?.emit("startPrivateChat", {
+      receiver: finalTarget,
+    });
+
+    setSelectedChatUser(finalTarget);
+    setNewChatInput("");
   };
 
-  // --- Ticket Handlers ---
+  // ─── Tickets ────────────────────────────────────
+
   const handleCreateTicket = () => {
-    if (newTicketTitle.trim() && newTicketText.trim() && socket) {
-      socket.emit("createTicket", { creator: activeUser, title: newTicketTitle, text: newTicketText });
-      setNewTicketTitle("");
-      setNewTicketText("");
-      setIsCreatingTicket(false);
-    }
+    if (!newTicketTitle.trim() || !newTicketText.trim() || !socket) return;
+
+    socket.emit("createTicket", {
+      title: newTicketTitle,
+      text: newTicketText,
+    });
+
+    setNewTicketTitle("");
+    setNewTicketText("");
+    setIsCreatingTicket(false);
   };
 
   const handleReplyTicket = () => {
-    if (replyInput.trim() && selectedTicketId && socket) {
-      socket.emit("replyTicket", { ticketId: selectedTicketId, sender: activeUser, text: replyInput });
-      setReplyInput("");
-    }
+    if (!replyInput.trim() || !selectedTicketId || !socket) return;
+
+    socket.emit("replyTicket", {
+      ticketId: selectedTicketId,
+      text: replyInput,
+    });
+
+    setReplyInput("");
   };
 
   if (!isOpen) return null;
 
-  // Views
+  // ─── Views ──────────────────────────────────────
+
   const renderDMList = () => (
     <div className="list-container">
       <div className="new-chat">
-        <InputText value={newChatInput} 
-                   onChange={(e) => setNewChatInput(e.target.value)}
-                   onKeyDown={(e) => e.key === "Enter" && handleStartNewChat()}
-                   placeholder="Tag amigo (ej: @juan)..." />
-        <Button icon="pi pi-plus" onClick={handleStartNewChat} className="p-button-rounded" />
+        <InputText
+          value={newChatInput}
+          onChange={(e) => setNewChatInput(e.target.value)}
+          onKeyDown={(e) =>
+            e.key === "Enter" && handleStartNewChat()
+          }
+          placeholder="Tag amigo (ej: @juan)..."
+        />
+
+        <Button
+          icon="pi pi-plus"
+          onClick={handleStartNewChat}
+          className="p-button-rounded"
+        />
       </div>
+
       <div className="chats-list">
         {privateChats.map((c, i) => {
-          const otherUser = c.participants.find((p) => p !== activeUser) || activeUser;
+          const otherUser =
+            c.participants.find((p) => p !== activeUser) || activeUser;
+
           const lastMsg = c.messages[c.messages.length - 1];
+
           return (
-            <div key={i} className="list-item" onClick={() => setSelectedChatUser(otherUser)}>
+            <div
+              key={i}
+              className="list-item"
+              onClick={() => setSelectedChatUser(otherUser)}
+            >
               <div className="item-title">
                 <i className="pi pi-user"></i> {otherUser}
               </div>
-              {lastMsg && <div className="item-desc">{lastMsg.text}</div>}
+
+              {lastMsg && (
+                <div className="item-desc">
+                  {lastMsg.text}
+                </div>
+              )}
             </div>
           );
         })}
@@ -166,28 +251,62 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
   );
 
   const renderDMChat = () => {
-    const chat = privateChats.find((c) => c.participants.includes(selectedChatUser!));
+    const chat = privateChats.find((c) =>
+      c.participants.includes(selectedChatUser!)
+    );
+
     const messages = chat ? chat.messages : [];
+
     return (
       <div className="active-chat">
         <div className="chat-header-actions">
-          <Button icon="pi pi-arrow-left" className="p-button-text p-button-rounded" onClick={() => setSelectedChatUser(null)} />
+          <Button
+            icon="pi pi-arrow-left"
+            className="p-button-text p-button-rounded"
+            onClick={() => setSelectedChatUser(null)}
+          />
+
           <h4>{selectedChatUser}</h4>
         </div>
+
         <div className="messages-container">
           {messages.map((msg) => (
-            <div key={msg.id} className={`message ${msg.sender === activeUser ? "sent" : "received"}`}>
+            <div
+              key={msg.id}
+              className={`message ${
+                msg.sender === activeUser
+                  ? "sent"
+                  : "received"
+              }`}
+            >
               <div className="message-bubble">
                 <p>{msg.text}</p>
-                <span className="timestamp">{msg.timestamp}</span>
+
+                <span className="timestamp">
+                  {msg.timestamp}
+                </span>
               </div>
             </div>
           ))}
+
           <div ref={messagesEndRef} />
         </div>
+
         <div className="chat-input-container">
-          <InputText value={msgInput} onChange={(e) => setMsgInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSendDM()} placeholder="Mensaje..." />
-          <Button icon="pi pi-send" onClick={handleSendDM} className="p-button-rounded" />
+          <InputText
+            value={msgInput}
+            onChange={(e) => setMsgInput(e.target.value)}
+            onKeyDown={(e) =>
+              e.key === "Enter" && handleSendDM()
+            }
+            placeholder="Mensaje..."
+          />
+
+          <Button
+            icon="pi pi-send"
+            onClick={handleSendDM}
+            className="p-button-rounded"
+          />
         </div>
       </div>
     );
@@ -197,19 +316,45 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
     <div className="list-container">
       {!isAdmin && (
         <div className="new-ticket-action">
-          <Button label="Crear Nuevo Ticket" icon="pi pi-plus" onClick={() => setIsCreatingTicket(true)} className="p-button-outlined" />
+          <Button
+            label="Crear Nuevo Ticket"
+            icon="pi pi-plus"
+            onClick={() => setIsCreatingTicket(true)}
+            className="p-button-outlined"
+          />
         </div>
       )}
+
       <div className="chats-list">
         {tickets.map((t) => (
-          <div key={t.id} className="list-item" onClick={() => setSelectedTicketId(t.id)}>
+          <div
+            key={t.id}
+            className="list-item"
+            onClick={() => setSelectedTicketId(t.id)}
+          >
             <div className="item-title">
               <i className="pi pi-ticket"></i> {t.title}
             </div>
-            <div className="item-desc">{isAdmin ? `De: ${t.creator}` : `Estado: ${t.status}`}</div>
+
+            <div className="item-desc">
+              {isAdmin
+                ? `De: ${t.creator}`
+                : `Estado: ${t.status}`}
+            </div>
           </div>
         ))}
-        {tickets.length === 0 && <p style={{ textAlign: 'center', opacity: 0.7, marginTop: '20px' }}>No hay tickets.</p>}
+
+        {tickets.length === 0 && (
+          <p
+            style={{
+              textAlign: "center",
+              opacity: 0.7,
+              marginTop: "20px",
+            }}
+          >
+            No hay tickets.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -217,44 +362,117 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
   const renderCreateTicket = () => (
     <div className="create-ticket">
       <div className="chat-header-actions">
-        <Button icon="pi pi-arrow-left" className="p-button-text p-button-rounded" onClick={() => setIsCreatingTicket(false)} />
+        <Button
+          icon="pi pi-arrow-left"
+          className="p-button-text p-button-rounded"
+          onClick={() => setIsCreatingTicket(false)}
+        />
+
         <h4>Nuevo Ticket de Soporte</h4>
       </div>
+
       <div className="form-container">
-        <InputText value={newTicketTitle} onChange={(e) => setNewTicketTitle(e.target.value)} placeholder="Asunto del problema" />
-        <InputTextarea value={newTicketText} onChange={(e) => setNewTicketText(e.target.value)} rows={5} placeholder="Describe detalladamente el problema..." autoResize />
-        <Button label="Enviar Ticket" onClick={handleCreateTicket} />
+        <InputText
+          value={newTicketTitle}
+          onChange={(e) =>
+            setNewTicketTitle(e.target.value)
+          }
+          placeholder="Asunto del problema"
+        />
+
+        <InputTextarea
+          value={newTicketText}
+          onChange={(e) =>
+            setNewTicketText(e.target.value)
+          }
+          rows={5}
+          placeholder="Describe detalladamente el problema..."
+          autoResize
+        />
+
+        <Button
+          label="Enviar Ticket"
+          onClick={handleCreateTicket}
+        />
       </div>
     </div>
   );
 
   const renderActiveTicket = () => {
-    const ticket = tickets.find((t) => t.id === selectedTicketId);
+    const ticket = tickets.find(
+      (t) => t.id === selectedTicketId
+    );
+
     if (!ticket) return null;
+
     return (
       <div className="active-chat">
         <div className="chat-header-actions">
-          <Button icon="pi pi-arrow-left" className="p-button-text p-button-rounded" onClick={() => setSelectedTicketId(null)} />
-          <div style={{ display: "flex", flexDirection: "column" }}>
-             <h4 style={{ margin: 0 }}>{ticket.title}</h4>
-             <small style={{ opacity: 0.8 }}>{ticket.creator}</small>
+          <Button
+            icon="pi pi-arrow-left"
+            className="p-button-text p-button-rounded"
+            onClick={() => setSelectedTicketId(null)}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <h4 style={{ margin: 0 }}>{ticket.title}</h4>
+
+            <small style={{ opacity: 0.8 }}>
+              {ticket.creator}
+            </small>
           </div>
         </div>
+
         <div className="messages-container">
           {ticket.messages.map((msg) => (
-            <div key={msg.id} className={`message ${msg.sender === activeUser ? "sent" : "received"}`}>
-              <span className="sender">{msg.sender.includes("admin") ? "Soporte" : msg.sender}</span>
+            <div
+              key={msg.id}
+              className={`message ${
+                msg.sender === activeUser
+                  ? "sent"
+                  : "received"
+              }`}
+            >
+              <span className="sender">
+                {msg.sender}
+              </span>
+
               <div className="message-bubble">
                 <p>{msg.text}</p>
-                <span className="timestamp">{msg.timestamp}</span>
+
+                <span className="timestamp">
+                  {msg.timestamp}
+                </span>
               </div>
             </div>
           ))}
+
           <div ref={messagesEndRef} />
         </div>
+
         <div className="chat-input-container">
-          <InputText value={replyInput} onChange={(e) => setReplyInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleReplyTicket()} placeholder="Responder al ticket..." />
-          <Button icon="pi pi-send" onClick={handleReplyTicket} className="p-button-rounded" />
+          <InputText
+            value={replyInput}
+            onChange={(e) =>
+              setReplyInput(e.target.value)
+            }
+            onKeyDown={(e) =>
+              e.key === "Enter" &&
+              handleReplyTicket()
+            }
+            placeholder="Responder al ticket..."
+          />
+
+          <Button
+            icon="pi pi-send"
+            onClick={handleReplyTicket}
+            className="p-button-rounded"
+          />
         </div>
       </div>
     );
@@ -264,20 +482,51 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
     <div className="chat-panel expanded">
       <div className="chat-header">
         <div className="tabs">
-          <button className={activeTab === "dms" ? "active" : ""} onClick={() => { setActiveTab("dms"); setSelectedChatUser(null); }}>
+          <button
+            className={
+              activeTab === "dms" ? "active" : ""
+            }
+            onClick={() => {
+              setActiveTab("dms");
+              setSelectedChatUser(null);
+            }}
+          >
             Mensajes
           </button>
-          <button className={activeTab === "support" ? "active" : ""} onClick={() => { setActiveTab("support"); setSelectedTicketId(null); setIsCreatingTicket(false); }}>
+
+          <button
+            className={
+              activeTab === "support" ? "active" : ""
+            }
+            onClick={() => {
+              setActiveTab("support");
+              setSelectedTicketId(null);
+              setIsCreatingTicket(false);
+            }}
+          >
             Soporte
           </button>
         </div>
       </div>
-      
-      <Button icon="pi pi-times" className="p-button-rounded p-button-text close-btn" onClick={onClose} />
+
+      <Button
+        icon="pi pi-times"
+        className="p-button-rounded p-button-text close-btn"
+        onClick={onClose}
+      />
 
       <div className="chat-body">
-        {activeTab === "dms" && (selectedChatUser ? renderDMChat() : renderDMList())}
-        {activeTab === "support" && (isCreatingTicket ? renderCreateTicket() : selectedTicketId ? renderActiveTicket() : renderTicketsList())}
+        {activeTab === "dms" &&
+          (selectedChatUser
+            ? renderDMChat()
+            : renderDMList())}
+
+        {activeTab === "support" &&
+          (isCreatingTicket
+            ? renderCreateTicket()
+            : selectedTicketId
+            ? renderActiveTicket()
+            : renderTicketsList())}
       </div>
     </div>
   );
