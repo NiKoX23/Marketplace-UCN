@@ -8,6 +8,7 @@ import { ChatModule } from './chat/chat.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { Usuario } from './usuarios/usuario.entity';
 import { PublicacionesModule } from './publicaciones/publicaciones.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { PublicacionesModule } from './publicaciones/publicaciones.module';
     AuthModule,
     ChatModule,
     PublicacionesModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

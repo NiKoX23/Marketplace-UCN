@@ -13,6 +13,19 @@
     --background-hover:#37383a;
 }
 
+/* === MODO CLARO === */
+.inicio.light {
+    --background-color: #f8fafc;
+    --text-title-color: #0f172a;
+    --header-bg: rgba(226, 232, 240, 0.95);
+    --sidebar-bg: #e2e8f0;
+    --text-color: #0f172a;
+    --menu-color: #475569;
+    --text-selected-color: #0f172a;
+    --background-selected: #cbd5e1;
+    --background-hover: #cbd5e1;
+}
+
 *{
     margin: 0;
     padding: 0;

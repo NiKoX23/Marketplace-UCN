@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../Styles/SubirArchivo.css";
 
 function SubirArchivo() {
+    const navigate = useNavigate();
     const [titulo, setTitulo] = useState("");
     const [comentario, setComentario] = useState("");
     const [file, setFile] = useState<File | null>(null);
@@ -10,7 +12,7 @@ function SubirArchivo() {
 
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
-        if(!file || !titulo || !comentario) {
+        if (!file || !titulo || !comentario) {
             alert("Por favor, completar todos los campos.");
             return;
         }
@@ -44,27 +46,36 @@ function SubirArchivo() {
 
     return (
         <div className="container-subir-archivo">
-            <form onSubmit={handleUpload} style={{marginBottom: "30px"}}>
-                <input 
+            <h2 style={{ textAlign: "center", marginBottom: "5px", color: "white" }}>Sube tu archivo con nosotros</h2>
+            <p style={{ textAlign: "center", marginBottom: "20px", color: "#94a3b8", fontSize: "14px" }}>No aceptamos archivos superiores a 15mb</p>
+            <form onSubmit={handleUpload} style={{ marginBottom: "30px" }}>
+                <input
                     placeholder="Título"
                     value={titulo}
                     onChange={(e) => setTitulo(e.target.value)}
-                    style={{display: "block", marginBottom:"10px"}}
+                    style={{ display: "block", marginBottom: "10px" }}
                 />
-                <textarea 
+                <textarea
                     placeholder="Comentario"
                     value={comentario}
                     onChange={(e) => setComentario(e.target.value)}
-                    style={{display: "block", marginBottom:"10px"}}
+                    style={{ display: "block", marginBottom: "10px" }}
                 />
 
-                <input 
+                <input
                     type="file"
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    style={{display: "block", marginBottom:"10px"}}
+                    style={{ display: "block", marginBottom: "10px" }}
                 />
 
                 <button type="submit" disabled={loading}>{loading ? "Subiendo..." : "Subir publicación"}</button>
+                <button
+                    type="button"
+                    onClick={() => navigate("/inicio")}
+                    style={{ display: "block", marginTop: "15px", background: "#64748b", color: "white", padding: "10px", border: "none", borderRadius: "5px", cursor: "pointer", width: "100%" }}
+                >
+                    Volver a Inicio
+                </button>
             </form>
         </div>
     )

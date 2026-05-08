@@ -53,6 +53,11 @@ export class UsuariosService {
     return this.repo.findOne({ where: { id } });
   }
 
+  /** Lista todos los usuarios */
+  async findAll(): Promise<Usuario[]> {
+    return this.repo.find({ order: { creadoEn: 'ASC' } });
+  }
+
   /**
    * Crea un nuevo usuario.
    * La contraseña se hashea con bcrypt (12 rondas).
@@ -109,7 +114,13 @@ export class UsuariosService {
   }): Promise<Usuario> {
     // 1) ¿Ya existe por googleId?
     let usuario = await this.findByGoogleId(profile.googleId);
-    if (usuario) return usuario;
+    if (usuario) {
+      if (usuario.rol !== profile.rol) {
+        usuario.rol = profile.rol;
+        return this.repo.save(usuario);
+      }
+      return usuario;
+    }
 
     // 2) ¿Ya existe por email? → vincular googleId
     usuario = await this.findByEmail(profile.email);

@@ -45,6 +45,7 @@ export interface Ticket {
   messages: Message[];
   status: 'open' | 'closed';
   updatedAt?: number;
+  createdAt?: string;
 }
 
 @WebSocketGateway({
@@ -244,8 +245,9 @@ export class ChatGateway
           (t) => t.creator === identifier,
         );
 
+    // Ordenar de más antiguo a más nuevo
     userTickets.sort(
-      (a, b) => (b.updatedAt || 0) - (a.updatedAt || 0),
+      (a, b) => (a.updatedAt || 0) - (b.updatedAt || 0),
     );
 
     client.emit('ticketsList', userTickets);
@@ -276,11 +278,31 @@ export class ChatGateway
       messages: [msg],
       status: 'open',
       updatedAt: Date.now(),
+      createdAt: new Date().toISOString(),
     };
 
     this.tickets.push(ticket);
 
     this.server.emit('ticketsUpdated', ticket);
+  }
+
+  @SubscribeMessage('closeTicket')
+  handleCloseTicket(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    payload: { ticketId: string },
+  ) {
+    const user = this.getUser(client);
+
+    if (user.rol !== Rol.ADMIN) return;
+
+    const idx = this.tickets.findIndex((t) => t.id === payload.ticketId);
+    if (idx === -1) return;
+
+    // Eliminar el ticket
+    this.tickets.splice(idx, 1);
+
+    this.server.emit('ticketsUpdated');
   }
 
   @SubscribeMessage('replyTicket')
