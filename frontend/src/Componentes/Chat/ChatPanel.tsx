@@ -96,6 +96,10 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
     setSocket(newSocket);
 
+    newSocket.on("chatError", (data) => {
+      alert(data.message);
+    })
+
     newSocket.on("connect", () => {
       newSocket.emit("getPrivateChats");
       newSocket.emit("getTickets");
@@ -120,6 +124,10 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
     newSocket.on("ticketReplied", () => {
       newSocket.emit("getTickets");
     });
+
+    newSocket.on("chatStarted", (data) =>{
+      setSelectedChatUser(data.receiver);
+    })
 
     return () => {
       newSocket.disconnect();
@@ -168,7 +176,6 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
       receiver: finalTarget,
     });
 
-    setSelectedChatUser(finalTarget);
     setNewChatInput("");
   };
 

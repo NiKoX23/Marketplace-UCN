@@ -9,14 +9,11 @@ import {
   MessageBody,
 } from '@nestjs/websockets';
 
-import {
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
-
+import { Logger, UnauthorizedException} from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
-import * as jwt from 'jsonwebtoken';
 import { Rol } from '../usuarios/usuario.entity';
+import { UsuariosService } from '../usuarios/usuarios.service';
+import * as jwt from 'jsonwebtoken';
 
 interface SocketUser {
   sub: string;
@@ -63,6 +60,10 @@ export class ChatGateway
 
   private tickets: Ticket[] = [];
   private privateChats: PrivateChat[] = [];
+
+  constructor(
+    private readonly usuariosService: UsuariosService,
+  ){}
 
   afterInit(server: Server) {
     this.logger.log('Init');
@@ -129,12 +130,9 @@ export class ChatGateway
     @ConnectedSocket() client: Socket,
   ) {
     const user = this.getUser(client);
-
-    const identifier =
-      user.username || user.email;
-
+    const identifer = user.username || user.email;
     const chats = this.privateChats.filter((c) =>
-      c.participants.includes(identifier),
+      c.participants.includes(identifer),
     );
 
     chats.sort(
@@ -145,25 +143,29 @@ export class ChatGateway
   }
 
   @SubscribeMessage('startPrivateChat')
-  handleStartPrivateChat(
+  async handleStartPrivateChat(
     @ConnectedSocket() client: Socket,
     @MessageBody()
     payload: { receiver: string },
   ) {
     const user = this.getUser(client);
+    const sender = user.username || user.email;
+    const receiver = payload.receiver.trim();
+    const usuarioExiste = await this.usuariosService.findByUsername(receiver);
 
-    const sender =
-      user.username || user.email;
+    if(!usuarioExiste) { 
+      client.emit('chatError',{message: 'Usuario no encontrado',});
+      return;
+    }
 
-    let chat = this.privateChats.find(
-      (c) =>
+    let chat = this.privateChats.find((c) =>
         c.participants.includes(sender) &&
-        c.participants.includes(payload.receiver),
+        c.participants.includes(receiver),
     );
 
     if (!chat) {
       chat = {
-        participants: [sender, payload.receiver],
+        participants: [sender, receiver],
         messages: [],
         updatedAt: Date.now(),
       };
@@ -171,27 +173,29 @@ export class ChatGateway
       this.privateChats.push(chat);
     }
 
-    const chats = this.privateChats.filter((c) =>
-      c.participants.includes(sender),
-    );
+    const chats = this.privateChats.filter((c) => c.participants.includes(sender),);
 
-    chats.sort(
-      (a, b) => (b.updatedAt || 0) - (a.updatedAt || 0),
-    );
+    chats.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0),);
 
     client.emit('privateChatsList', chats);
+    client.emit('chatStarted',{receiver,})
   }
 
   @SubscribeMessage('sendPrivateMessage')
-  handleSendPrivateMessage(
+  async handleSendPrivateMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody()
     payload: { receiver: string; text: string },
   ) {
     const user = this.getUser(client);
 
-    const sender =
-      user.username || user.email;
+    const sender = user.username || user.email;
+    const usuarioExiste = await this.usuariosService.findByUsername(payload.receiver,);
+
+    if(!usuarioExiste) { 
+      client.emit('chatError',{message: 'Usuario no encontrado',});
+      return;
+    }
 
     let chat = this.privateChats.find(
       (c) =>
