@@ -30,16 +30,19 @@ function SubirArchivo() {
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData
             });
-            if (!res.ok) { throw new Error("Error upload"); }
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "Error upload"); 
+            
+            }
 
             setTitulo("");
             setComentario("");
             setFile(null);
             alert("Publicación subida exitosamente!");
 
-        } catch (error) {
-            console.error(error);
-            alert("Error al subir la publicación");
+        } catch (error: any) {
+            alert(error instanceof Error ? error.message : "Error al subir la publicación");
 
         } finally { setLoading(false); }
     };
@@ -47,7 +50,7 @@ function SubirArchivo() {
     return (
         <div className="container-subir-archivo">
             <h2 style={{ textAlign: "center", marginBottom: "5px", color: "white" }}>Sube tu archivo con nosotros</h2>
-            <p style={{ textAlign: "center", marginBottom: "20px", color: "#94a3b8", fontSize: "14px" }}>No aceptamos archivos superiores a 15mb</p>
+            <p style={{ textAlign: "center", marginBottom: "20px", color: "#94a3b8", fontSize: "14px" }}>No aceptamos archivos superiores a 10mb</p>
             <form onSubmit={handleUpload} style={{ marginBottom: "30px" }}>
                 <input
                     placeholder="Título"

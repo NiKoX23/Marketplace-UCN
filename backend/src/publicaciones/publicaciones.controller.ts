@@ -3,6 +3,7 @@ import { Controller, Get, Post, Body, UploadedFile, UseInterceptors, UseGuards, 
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PublicacionesService } from './publicaciones.service';
 import { JwtAuthGuard } from '../auth/guards/auth.guards';
+import { BadRequestException } from '@nestjs/common';
 
 @Controller('publicaciones')
 export class PublicacionesController {
@@ -22,11 +23,24 @@ export class PublicacionesController {
         @Body('comentario') comentario: string,
         @Req() req: any,
     ) {
-    const usuarioId = req.user.id;
-    
-    if (!req.user?.id) {
-        throw new UnauthorizedException("Usuario no autenticado");
-    }
+        const usuarioId = req.user.id;
+        
+        if (!req.user?.id) {
+            throw new UnauthorizedException("Usuario no autenticado");
+        }
+        
+        console.log(file.mimetype);
+        if(!file) {throw new BadRequestException("No se selecciono ningun archivo")}
+        
+        const allowedExtensions = process.env.ALLOWED_EXTENSIONS?.split(',') || [];
+        const extension = file.originalname.split('.').pop()?.toLowerCase();
+        const maxSizeFile = Number(process.env.MAX_SIZE_FILE);
+
+        if(!extension || !allowedExtensions.includes(extension)){ throw new BadRequestException("Archivo no aceptado"); }
+        if(!maxSizeFile || isNaN(maxSizeFile)){ throw new BadRequestException("Error peso archivo"); }
+        if(file.size > maxSizeFile) { throw new BadRequestException("Peso del archivo no permitido"); }
+
+
     return this.service.crearPublicacion(
         file,
         titulo,

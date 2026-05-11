@@ -14,7 +14,6 @@ export class Publicacion {
     @Column() titulo!: string;
     @Column({ type: 'text' }) comentario!: string;
 
-    // URL del archivo en Cloudflare
     @Column() fileUrl!: string;
     @Column() fileName!: string;
 

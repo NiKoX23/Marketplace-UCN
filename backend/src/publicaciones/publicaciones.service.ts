@@ -19,14 +19,19 @@ export class PublicacionesService {
         comentario: string,
         usuarioId: string,
     ){
-        const fileName = `${Date.now()}-${file.originalname}`;
+        const sanitizedFileName = file.originalname
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-zA-Z0-9.-]/g, "_")
+
+        const fileName = `${Date.now()}-${sanitizedFileName}`;
         const { data, error } = await supabase.storage
             .from(process.env.SUPABASE_BUCKET!)
             .upload(fileName, file.buffer, {
                 contentType: file.mimetype,
             })
 
-        if (error) { throw new Error("Error al subir el archivo"); }
+        if (error) { console.log(error); throw new Error(error.message) }
 
         const { data: publicUrl } = supabase.storage
             .from(process.env.SUPABASE_BUCKET!)
