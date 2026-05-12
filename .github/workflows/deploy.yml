@@ -18,6 +18,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /home/daniel/Marketplace-UCN
+            cd /home/adminc/Marketplace-UCN
             chmod +x deploy.sh
             ./deploy.sh
