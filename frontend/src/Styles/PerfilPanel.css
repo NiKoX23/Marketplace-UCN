@@ -5,7 +5,7 @@
     width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 150;
+    z-index: 999;
 }
 
 .perfil-lateral {
@@ -16,7 +16,7 @@
     height: 100%;
     background: radial-gradient(circle at top right, #1e293b, #0f172a);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 200;
+    z-index: 1000;
     padding: 1.5rem;
     box-shadow: -4px 0 15px rgba(0,0,0,0.5);
     display: flex;

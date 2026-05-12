@@ -321,7 +321,7 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
   const renderTicketsList = () => (
     <div className="list-container">
-      {!isAdmin && (
+      {true && (
         <div className="new-ticket-action">
           <Button
             label="Crear Nuevo Ticket"

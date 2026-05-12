@@ -98,7 +98,7 @@ function Inicio() {
         <div className={`inicio ${isDarkMode ? "" : "light"}`} style={{ background: "var(--background-color)", minHeight: "100vh", height: "auto" }}>
             <header className="headerBarraLateral">
                 <div className="izquierda">
-                    <button disabled={abrirChat} className="botonMenu" onClick={() => setAbrirBarra(!abrirBarra)}>
+                    <button className="botonMenu" onClick={() => setAbrirBarra(!abrirBarra)}>
                         <i className="pi pi-bars" style={{ fontSize: "1.25rem" }}></i>
                         <p style={{ color: "var(--text-color)" }}>{t.servidores}</p>
                     </button>
@@ -122,19 +122,19 @@ function Inicio() {
                         <p style={{ color: "var(--text-color)" }}>{t.subirArchivo}</p>
                     </button>
 
-                    <button disabled={abrirPerfil} className={`botonChat ${abrirChat ? "activo" : ""}`} onClick={() => setAbrirChat(!abrirChat)}>
+                    <button className={`botonChat ${abrirChat ? "activo" : ""}`} onClick={() => setAbrirChat(!abrirChat)}>
                         <i className="pi pi-comments" style={{ fontSize: "1.5rem" }}></i>
                         <p style={{ color: "var(--text-color)" }}>{t.chat}</p>
                     </button>
 
                     {isAdmin && (
-                        <button disabled={abrirChat} className="botonAdmin" onClick={() => navigate("/adminPanel")}>
+                        <button className="botonAdmin" onClick={() => navigate("/adminPanel")}>
                             <i className="pi pi-shield" style={{ fontSize: "1.5rem" }}></i>
                             <p style={{ color: "var(--text-color)" }}>{t.perfilAdmin}</p>
                         </button>
                     )}
 
-                    <button disabled={abrirChat} className={`botonPerfil ${abrirPerfil ? "activo" : ""}`} onClick={() => setAbrirPerfil(!abrirPerfil)}>
+                    <button className={`botonPerfil ${abrirPerfil ? "activo" : ""}`} onClick={() => setAbrirPerfil(!abrirPerfil)}>
                         <i className="pi pi-user" style={{ fontSize: "1.5rem" }}></i>
                         <p style={{ color: "var(--text-color)" }}>{t.perfil}</p>
                     </button>
@@ -195,6 +195,11 @@ function Inicio() {
             </div>
 
             {/* Barra lateral de canales */}
+            {abrirBarra && (
+                <div className="sidebar-overlay" onClick={()=>setAbrirBarra(false)}
+                />
+            )}
+            
             <div className={`barra-lateral ${abrirBarra ? "activa" : ""}`}>
                 <h2>{t.canales}</h2>
                 <ul>
