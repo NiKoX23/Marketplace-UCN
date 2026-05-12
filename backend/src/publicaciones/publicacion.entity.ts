@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Usuario } from '../usuarios/usuario.entity';
+import { Canal } from '../canales/canales.entity';
 
 @Entity('publicaciones')
 export class Publicacion {
@@ -19,6 +20,12 @@ export class Publicacion {
 
     @ManyToOne(() => Usuario, { eager: false })
     @JoinColumn({ name: 'usuarioId' }) usuario!: Usuario;
+
+    @ManyToOne(() => Canal, {eager: true})
+    @JoinColumn({name: 'canalId'})
+    canal!: Canal;
+    @Column()
+    canalId!: number;
 
     @Column() usuarioId!: string;
     @CreateDateColumn() creadoEn!: Date;

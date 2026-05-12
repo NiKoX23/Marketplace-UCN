@@ -123,7 +123,8 @@ function HiloComentarios({ pubId, idioma }: { pubId: string; idioma: string }) {
     );
 }
 
-function Publicaciones({ idioma = "es", isDarkMode = true }: { idioma?: string; isDarkMode?: boolean }) {
+function Publicaciones({ idioma = "es", isDarkMode = true, selectedCanal= null }:
+                       { idioma?: string; isDarkMode?: boolean; selectedCanal?: number | null }) {
     const t: any = {
         es: { cargando: "Cargando publicaciones...", sinPubs: "No hay publicaciones disponibles.", pubs: "Publicaciones", usuario: "Usuario" },
         en: { cargando: "Loading posts...", sinPubs: "No posts available.", pubs: "Posts", usuario: "User" }
@@ -135,7 +136,8 @@ function Publicaciones({ idioma = "es", isDarkMode = true }: { idioma?: string; 
     useEffect(() => {
         const fetchdata = async () => {
             try {
-                const response = await fetch(`${API_URL}/publicaciones`);
+                const endpoint = selectedCanal ? `${API_URL}/publicaciones/canal/${selectedCanal}` : `${API_URL}/publicaciones`
+                const response = await fetch(endpoint);
                 if (!response.ok) { throw new Error("Error al cargar publicaciones"); }
                 const data = await response.json();
                 setPublicaciones(data ?? []);
@@ -143,7 +145,7 @@ function Publicaciones({ idioma = "es", isDarkMode = true }: { idioma?: string; 
             finally { setLoading(false); }
         };
         fetchdata();
-    }, []);
+    }, [selectedCanal]);
 
     if (loading) { return <p style={{ color: isDarkMode ? "white" : "black" }}>{t.cargando}</p>; }
 

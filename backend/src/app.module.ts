@@ -9,6 +9,7 @@ import { UsuariosModule } from './usuarios/usuarios.module';
 import { Usuario } from './usuarios/usuario.entity';
 import { PublicacionesModule } from './publicaciones/publicaciones.module';
 import { AdminModule } from './admin/admin.module';
+import { CanalesModule } from './canales/canales.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AdminModule } from './admin/admin.module';
     ChatModule,
     PublicacionesModule,
     AdminModule,
+    CanalesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

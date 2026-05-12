@@ -48,6 +48,8 @@ function Inicio() {
     const [isDarkMode, setIsDarkMode] = useState(true);
     const [idioma, setIdioma] = useState<"es" | "en">("es");
     const [ultimasOfertas, setUltimasOfertas] = useState<any[]>([]);
+    const [canales, setCanales] = useState<any[]>([]);
+    const [selectedCanal, setSelectedCanal] = useState<number | null>(null);
     const navigate = useNavigate();
 
     const t = traducciones[idioma];
@@ -64,6 +66,20 @@ function Inicio() {
         };
         fetchOfertas();
     }, []);
+
+    useEffect(() => {
+        const fetchCanales = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/canales");
+                if(res.ok){
+                    const data = await res.json();
+                    setCanales(data);
+                }
+            }catch(e){console.log(e)}
+        };
+
+        fetchCanales();
+    },[])
 
     const getPayloadFromToken = () => {
         const token = localStorage.getItem("accessToken");
@@ -149,7 +165,7 @@ function Inicio() {
                     marginRight: "20px",
                     background: isDarkMode ? "transparent" : "#ffffff"
                 }}>
-                    <Publicaciones idioma={idioma} isDarkMode={isDarkMode} />
+                    <Publicaciones idioma={idioma} isDarkMode={isDarkMode} selectedCanal={selectedCanal} />
                 </main>
 
                 {/* Panel de Últimas Ofertas */}
@@ -182,10 +198,20 @@ function Inicio() {
             <div className={`barra-lateral ${abrirBarra ? "activa" : ""}`}>
                 <h2>{t.canales}</h2>
                 <ul>
-                    <li>{t.ingSoftware}</li>
-                    <li>{t.calculo}</li>
-                    <li>{t.algebra}</li>
-                    <li>{t.poo}</li>
+                    <li onClick={() => setSelectedCanal(null)} 
+                        style={{cursor: "Pointer", fontWeight:selectedCanal === null ? "bold" : "normal"}}
+                    >
+                        Todos
+                    </li>
+
+                    {canales.map((canal) => (
+                        <li key={canal.id}
+                            onClick={() => setSelectedCanal(canal.id)}
+                            style={{cursor: "Pointer", fontWeight:selectedCanal === canal.id ? "bold" : "normal"}}
+                        >
+                            {canal.nombre}
+                        </li>
+                    ))}
                 </ul>
             </div>
         </div>

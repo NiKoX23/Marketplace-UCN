@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../Styles/SubirArchivo.css";
 
@@ -8,11 +8,27 @@ function SubirArchivo() {
     const [comentario, setComentario] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
+    const [canales, setCanales] = useState([]);
+    const [canalId, setCanalId] = useState("");
     const API = "http://localhost:3000";
+
+    useEffect(() => {
+        const fetchCanales = async () =>{
+            try {
+                const res = await fetch(`${API}/canales`);
+                if(!res.ok) { throw new Error("Error cargando canales");}
+                const data = await res.json();
+                setCanales(data);
+
+            }catch(error) { console.log(error); }
+        };
+
+        fetchCanales();
+    }, [])
 
     const handleUpload = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!file || !titulo || !comentario) {
+        if (!file || !titulo || !comentario || !canalId) {
             alert("Por favor, completar todos los campos.");
             return;
         }
@@ -22,6 +38,7 @@ function SubirArchivo() {
         formData.append("file", file);
         formData.append("titulo", titulo);
         formData.append("comentario", comentario);
+        formData.append("canalId", canalId);
 
         try {
             setLoading(true);
@@ -38,6 +55,7 @@ function SubirArchivo() {
 
             setTitulo("");
             setComentario("");
+            setCanalId("");
             setFile(null);
             alert("Publicación subida exitosamente!");
 
@@ -64,6 +82,21 @@ function SubirArchivo() {
                     onChange={(e) => setComentario(e.target.value)}
                     style={{ display: "block", marginBottom: "10px" }}
                 />
+
+                <select value={canalId}
+                        onChange={(e) => setCanalId(e.target.value)}
+                        style={{display: "block", marginBottom: "10px", width:"100%", padding:"10px"}}
+                >
+                    <option value="">
+                        Selccionar un canal
+                    </option>
+
+                    {canales.map((canal:any)=>(
+                        <option key={canal.id} value={canal.id}>
+                            {canal.nombre}
+                        </option>
+                    ))}
+                </select>
 
                 <input
                     type="file"

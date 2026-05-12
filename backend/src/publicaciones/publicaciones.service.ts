@@ -13,11 +13,24 @@ export class PublicacionesService {
 
     findAll() { return this.repo.find({ order: { creadoEn: "DESC" }, relations: ['usuario'] }); }
 
+    async findByCanal(canalId: number){
+        return this.repo.find({
+            where:{
+                canalId,
+            },
+            order:{
+                creadoEn:"DESC",
+            },
+            relations: ['usuario'],
+        })
+    }
+
     async crearPublicacion(
         file: any,
         titulo: string,
         comentario: string,
         usuarioId: string,
+        canalId: number,
     ){
         const sanitizedFileName = file.originalname
             .normalize("NFD")
@@ -43,6 +56,7 @@ export class PublicacionesService {
             fileUrl: publicUrl.publicUrl,
             fileName,
             usuarioId,
+            canalId,
         });
 
         return this.repo.save(nuevaPublicacion);
