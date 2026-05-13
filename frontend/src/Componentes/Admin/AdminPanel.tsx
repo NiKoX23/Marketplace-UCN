@@ -177,7 +177,30 @@ const AdminPanel: React.FC = () => {
       if(res.ok){{
         setPublicaciones((prev) => prev.filter((p) => p.id !== id),);
       }}
-    }catch(e){console.error("Error eliminando la publicaciones",e);}
+    }catch(e){console.error("Error eliminando la publicacion",e);}
+  }
+
+  const handleEliminarUsuario= async (id:string) => {
+
+    const confirmar = window.confirm("¿Desea eliminar este usuario?");
+    if(!confirmar) {return;}
+
+    try {
+      const token =localStorage.getItem("accessToken");
+      const res = await fetch(`${API_URL}/admin/usuarios/${id}`,
+        {
+          method: "DELETE",
+          headers:{
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if(res.ok){
+        setUsuarios((prev) => prev.filter((u) => u.id !== id));
+      }
+
+    }catch(e){console.error("Error al eliminar usuario",e);}
   }
 
   // ── MENÚ PRINCIPAL ─────────────────────────────────────────────────────────
@@ -245,6 +268,7 @@ const AdminPanel: React.FC = () => {
                     <th>Rol</th>
                     <th>Estado</th>
                     <th>Registrado</th>
+                    <th>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -265,6 +289,12 @@ const AdminPanel: React.FC = () => {
                       </td>
                       <td style={{ fontSize: "12px", color: "#94a3b8" }}>
                         {new Date(u.creadoEn).toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric" })}
+                      </td>
+
+                      <td>
+                        <button className="user-delete-user-btn" onClick={() => handleEliminarUsuario(u.id)}>
+                          Eliminar
+                        </button>
                       </td>
                     </tr>
                   ))}

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, UseGuards, Param } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/auth.guards';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -13,7 +13,13 @@ export class AdminController {
   @Get('usuarios')
   async listarUsuarios() {
     const usuarios = await this.usuariosService.findAll();
-    // Omitir datos sensibles
     return usuarios.map(({ passwordHash, googleId, ...pub }) => pub);
+  }
+
+  @Delete("usuarios/:id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("admin")
+  eliminarUsuario(@Param("id") id:string){
+    return this.usuariosService.eliminarUsuario(id);
   }
 }
