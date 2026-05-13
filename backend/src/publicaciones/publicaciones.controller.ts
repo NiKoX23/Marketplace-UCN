@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, UploadedFile, UseInterceptors, UseGuards, Req, UnauthorizedException, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, UploadedFile, UseInterceptors, UseGuards, Req, UnauthorizedException, Param, Delete } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PublicacionesService } from './publicaciones.service';
 import { JwtAuthGuard } from '../auth/guards/auth.guards';
 import { BadRequestException } from '@nestjs/common';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('publicaciones')
 export class PublicacionesController {
@@ -57,5 +59,14 @@ export class PublicacionesController {
         usuarioId,
         canalIdNumber,
     );
+  }
+
+  @Delete(":id")
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @Roles("admin")
+  async eliminarPublicacion(
+    @Param("id") id: string,
+  ){
+    return this.service.eliminarPublicacion(id);
   }
 }

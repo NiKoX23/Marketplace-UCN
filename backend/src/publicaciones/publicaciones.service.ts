@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { In, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Publicacion } from "./publicacion.entity";
 import { supabase } from "../Supabase/supabase.client";
 
@@ -60,5 +60,22 @@ export class PublicacionesService {
         });
 
         return this.repo.save(nuevaPublicacion);
+    }
+
+    async eliminarPublicacion(id: string){
+        const publicacion = await this.repo.findOne({where:{id}})
+
+        if(!publicacion){
+            throw new NotFoundException("Publicación no encontrada",);
+        }
+
+        const {error} = await supabase.storage.from(process.env.SUPABASE_BUCKET!).remove([publicacion.fileName]);
+        if(error){console.error("Error al borrar publicacions",error);}
+        await this.repo.remove(publicacion);
+
+        return{
+            ok: true,
+            message: "Publicacion borrada",
+        }
     }
 }

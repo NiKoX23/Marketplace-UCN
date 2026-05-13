@@ -34,7 +34,18 @@ interface Usuario {
   actualizadoEn: string;
 }
 
-type Vista = "menu" | "usuarios" | "tickets";
+interface Publicacion {
+  id: string,
+  titulo: string;
+  comentario: string;
+  archivoUrl: string;
+  createdAt: string;
+  usuario: { username: string; nombre: string;};
+  canal: {nombre: string;};
+
+}
+
+type Vista = "menu" | "usuarios" | "tickets" | "publicaciones";
 
 const AdminPanel: React.FC = () => {
   const [vista, setVista] = useState<Vista>("menu");
@@ -44,6 +55,8 @@ const AdminPanel: React.FC = () => {
   const [replyInputs, setReplyInputs] = useState<{ [key: string]: string }>({});
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loadingUsuarios, setLoadingUsuarios] = useState(false);
+  const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
+  const [loadingPublicaciones, setLoadingPublicaciones] = useState(false);
   const navigate = useNavigate();
   const userActualRef = useRef("");
 
@@ -98,8 +111,39 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  const cargarPublicaciones = async () => {
+    setLoadingPublicaciones(true);
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch(
+        `${API_URL}/publicaciones`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        setPublicaciones(data);
+      }
+
+    } catch (e) {
+      console.error("Error al cargar publicaciones", e);
+
+    } finally {
+      setLoadingPublicaciones(false);
+    }
+  };
+
   useEffect(() => {
     if (vista === "usuarios") cargarUsuarios();
+  }, [vista]);
+
+  useEffect(() => {
+    if (vista === "publicaciones") cargarPublicaciones();
   }, [vista]);
 
   const handleReply = (ticketId: string) => {
@@ -115,6 +159,26 @@ const AdminPanel: React.FC = () => {
       socket.emit("closeTicket", { ticketId });
     }
   };
+
+  const handleEliminarPublicacion = async(id: string) => {
+    const confirmar = window.confirm("¿Desea eliminar esta publicación?",);
+    if(!confirmar) {return;}
+
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await fetch(`${API_URL}/publicaciones/${id}`,
+        {
+          method: "DELETE",
+          headers:{
+            Authorization: `Bearer ${token}`,
+          },
+      });
+
+      if(res.ok){{
+        setPublicaciones((prev) => prev.filter((p) => p.id !== id),);
+      }}
+    }catch(e){console.error("Error eliminando la publicaciones",e);}
+  }
 
   // ── MENÚ PRINCIPAL ─────────────────────────────────────────────────────────
   if (vista === "menu") {
@@ -143,6 +207,11 @@ const AdminPanel: React.FC = () => {
               {tickets.filter(t => t.status === "open").length > 0 && (
                 <span className="admin-badge">{tickets.filter(t => t.status === "open").length} abiertos</span>
               )}
+            </button>
+
+            <button className="admin-menu-card" onClick={() => setVista("publicaciones")}>
+              <i className="pi pi-trash" style={{ fontSize: "2.5rem", color: "#f87171" }}></i>
+              <p>Eliminar Publicaciones Inadecuadas</p>
             </button>
           </div>
         </div>
@@ -209,6 +278,72 @@ const AdminPanel: React.FC = () => {
         </div>
       </div>
     );
+  }
+
+  //---------Publicaciones--------------------
+  if(vista === "publicaciones"){
+    return(
+      <div className="admin-page-container">
+        <div className="admin-panel">
+          <div className="admin-header">
+            <button className="admin-btn-back" onClick={() => setVista("menu")}>
+              ← Volver
+            </button>
+
+            <i className="pi pi-trash" style={{fontSize: "1.4rem", color: "#f87171",}}></i>
+
+            <h2>Gestión de Publicaciones</h2>
+          </div>
+
+          {loadingPublicaciones ? (
+            <p style={{color: "#94a3b8", padding: "20px",}}>
+              Cargando publicaciones...
+            </p>
+          ) : (
+            <div className="admin-publicaciones-grid">
+              {publicaciones.map((p) => (
+                <div key={p.id} className="admin-publicacion-card">
+                  <div className="admin-publicacion-top">
+                    <div>
+                      <h3>{p.titulo}</h3>
+
+                      <span>
+                        @{p.usuario.username} • #
+                        {p.canal.nombre}
+                      </span>
+                    </div>
+
+                    <button className="admin-delete-btn" onClick={() => handleEliminarPublicacion(p.id,)}>
+                      Eliminar
+                    </button>
+                  </div>
+
+                  <p>{p.comentario}</p>
+
+                  {p.archivoUrl && (
+                    <a href={p.archivoUrl} target="_blank" rel="noreferrer" className="admin-file-link">
+                      Ver archivo
+                    </a>
+                  )}
+
+                  <small>
+                    {new Date(
+                      p.createdAt,
+                    ).toLocaleString("es-CL")}
+                  </small>
+                </div>
+              ))}
+
+              {publicaciones.length === 0 && (
+                <div className="no-tickets">
+                  No hay publicaciones.
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    )
   }
 
   // ── TICKETS ────────────────────────────────────────────────────────────────
