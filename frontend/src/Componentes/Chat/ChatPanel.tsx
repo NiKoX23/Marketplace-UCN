@@ -32,6 +32,10 @@ interface TokenPayload {
   username?: string;
 }
 
+const formatUser =(username: string) =>{
+  return username.startsWith("@") ? username : `@${username}`
+}
+
 const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
   onClose,
@@ -345,7 +349,7 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
             <div className="item-desc">
               {isAdmin
-                ? `De: ${t.creator}`
+                ? `De: ${formatUser(t.creator)}`
                 : `Estado: ${t.status}`}
             </div>
           </div>
@@ -430,7 +434,7 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             <h4 style={{ margin: 0 }}>{ticket.title}</h4>
 
             <small style={{ opacity: 0.8 }}>
-              {ticket.creator}
+              {formatUser(ticket.creator)}
             </small>
           </div>
         </div>
@@ -446,7 +450,7 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
               }`}
             >
               <span className="sender">
-                {msg.sender}
+                {formatUser(msg.sender)}
               </span>
 
               <div className="message-bubble">

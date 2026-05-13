@@ -164,7 +164,7 @@ function Publicaciones({ idioma = "es", isDarkMode = true, selectedCanal= null }
 
                             <FilePreview pub={pub} />
 
-                            <p style={{ fontSize: "14px", fontWeight: "bold", color: "#a78bfa" }}>{t.usuario}: @{pub.usuario?.username || pub.usuarioId}</p>
+                            <p style={{ fontSize: "14px", fontWeight: "bold", color: "#a78bfa" }}>{t.usuario}: {pub.usuario?.username || pub.usuarioId}</p>
                             <p style={{ fontSize: "12px", opacity: "0.5" }}>{new Date(pub.creadoEn).toLocaleDateString()}</p>
 
                             <HiloComentarios pubId={pub.id} idioma={idioma} />

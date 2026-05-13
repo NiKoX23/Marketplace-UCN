@@ -186,7 +186,7 @@ function Inicio() {
                         {ultimasOfertas.map(oferta => (
                             <li key={oferta.id} style={{ marginBottom: "15px", borderBottom: "1px solid #334155", paddingBottom: "10px" }}>
                                 <a href={`#pub-${oferta.id}`} style={{ textDecoration: "none", color: "#3b82f6", fontWeight: "bold", fontSize: "14px" }}>{oferta.titulo}</a>
-                                <p style={{ fontSize: "12px", color: "#a78bfa", margin: "4px 0 0 0" }}>@{oferta.usuario?.username || oferta.usuarioId}</p>
+                                <p style={{ fontSize: "12px", color: "#a78bfa", margin: "4px 0 0 0" }}>{oferta.usuario?.username || oferta.usuarioId}</p>
                                 <p style={{ fontSize: "11px", color: "#64748b", margin: 0 }}>{new Date(oferta.creadoEn).toLocaleDateString()}</p>
                             </li>
                         ))}

@@ -39,7 +39,7 @@ interface Publicacion {
   titulo: string;
   comentario: string;
   archivoUrl: string;
-  createdAt: string;
+  creadoEn: string;
   usuario: { username: string; nombre: string;};
   canal: {nombre: string;};
 
@@ -308,7 +308,7 @@ const AdminPanel: React.FC = () => {
                       <h3>{p.titulo}</h3>
 
                       <span>
-                        @{p.usuario.username} • #
+                        {p.usuario.username} • #
                         {p.canal.nombre}
                       </span>
                     </div>
@@ -328,8 +328,7 @@ const AdminPanel: React.FC = () => {
 
                   <small>
                     {new Date(
-                      p.createdAt,
-                    ).toLocaleString("es-CL")}
+                      p.creadoEn,).toLocaleString("es-CL")}
                   </small>
                 </div>
               ))}
@@ -366,7 +365,7 @@ const AdminPanel: React.FC = () => {
                   <div>
                     <h4 className="ticket-title-text">{t.title}</h4>
                     <div className="ticket-meta">
-                      <span>👤 <strong>@{t.creator}</strong></span>
+                      <span>👤 <strong>{t.creator}</strong></span>
                       {t.createdAt && (
                         <span style={{ marginLeft: "12px", color: "#64748b", fontSize: "12px" }}>
                           🕐 {new Date(t.createdAt).toLocaleString("es-CL")}
