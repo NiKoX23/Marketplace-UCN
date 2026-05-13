@@ -57,7 +57,7 @@ function Inicio() {
     useEffect(() => {
         const fetchOfertas = async () => {
             try {
-                const res = await fetch("http://localhost:3000/publicaciones");
+                const res = await fetch("http://172-16-13-104.nip.io:3000/publicaciones", { credentials: "include" });
                 if (res.ok) {
                     const data = await res.json();
                     setUltimasOfertas(data.slice(0, 5));
@@ -70,7 +70,7 @@ function Inicio() {
     useEffect(() => {
         const fetchCanales = async () => {
             try {
-                const res = await fetch("http://localhost:3000/canales");
+                const res = await fetch("http://172-16-13-104.nip.io:3000/canales", { credentials: "include" });
                 if(res.ok){
                     const data = await res.json();
                     setCanales(data);

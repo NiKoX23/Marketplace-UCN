@@ -3,7 +3,7 @@ import { io, Socket } from "socket.io-client";
 import { useNavigate } from "react-router-dom";
 import "../../Styles/AdminPanel.css";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "http://172-16-13-104.nip.io:3000";
 
 interface Message {
   id: string;
@@ -98,6 +98,7 @@ const AdminPanel: React.FC = () => {
     try {
       const token = localStorage.getItem("accessToken");
       const res = await fetch(`${API_URL}/admin/usuarios`, {
+        credentials: "include",
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -119,6 +120,7 @@ const AdminPanel: React.FC = () => {
       const res = await fetch(
         `${API_URL}/publicaciones`,
         {
+          credentials: "include",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -169,6 +171,7 @@ const AdminPanel: React.FC = () => {
       const res = await fetch(`${API_URL}/publicaciones/${id}`,
         {
           method: "DELETE",
+          credentials: "include",
           headers:{
             Authorization: `Bearer ${token}`,
           },
@@ -190,6 +193,7 @@ const AdminPanel: React.FC = () => {
       const res = await fetch(`${API_URL}/admin/usuarios/${id}`,
         {
           method: "DELETE",
+          credentials: "include",
           headers:{
             Authorization: `Bearer ${token}`,
           },

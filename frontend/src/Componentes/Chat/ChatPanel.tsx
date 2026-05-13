@@ -91,7 +91,7 @@ const ChatPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
 
     const token = localStorage.getItem("accessToken");
 
-    const newSocket = io("http://localhost:3000", {
+    const newSocket = io("http://172-16-13-104.nip.io:3000", {
       transports: ["websocket"],
       auth: {
         token,

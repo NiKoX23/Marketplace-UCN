@@ -20,6 +20,7 @@ async function bootstrap() {
     origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    secure: false,
   });
 
   const port = process.env.PORT ?? 3000;

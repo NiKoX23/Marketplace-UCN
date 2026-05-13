@@ -18,6 +18,7 @@ const PerfilPanel: React.FC<PerfilPanelProps> = ({ isOpen, onClose }) => {
             setCargando(true);
             const token = localStorage.getItem("accessToken");
             fetch("http://172-16-13-104.nip.io:3000/auth/perfil", {
+                credentials: "include",
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }

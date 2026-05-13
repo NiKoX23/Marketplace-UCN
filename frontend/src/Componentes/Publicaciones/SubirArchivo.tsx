@@ -10,12 +10,12 @@ function SubirArchivo() {
     const [loading, setLoading] = useState(false);
     const [canales, setCanales] = useState([]);
     const [canalId, setCanalId] = useState("");
-    const API = "http://localhost:3000";
+    const API = "http://172-16-13-104.nip.io:3000";
 
     useEffect(() => {
         const fetchCanales = async () =>{
             try {
-                const res = await fetch(`${API}/canales`);
+                const res = await fetch(`${API}/canales`, { credentials: "include" });
                 if(!res.ok) { throw new Error("Error cargando canales");}
                 const data = await res.json();
                 setCanales(data);
@@ -44,6 +44,7 @@ function SubirArchivo() {
             setLoading(true);
             const res = await fetch(`${API}/publicaciones`, {
                 method: "POST",
+                credentials: "include",
                 headers: { Authorization: `Bearer ${token}` },
                 body: formData
             });

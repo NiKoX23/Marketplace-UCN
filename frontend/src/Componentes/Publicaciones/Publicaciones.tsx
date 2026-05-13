@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API_URL = "http://localhost:3000";
+const API_URL = "http://172-16-13-104.nip.io:3000";
 
 interface Publicacion {
     id: string;
@@ -137,7 +137,7 @@ function Publicaciones({ idioma = "es", isDarkMode = true, selectedCanal= null }
         const fetchdata = async () => {
             try {
                 const endpoint = selectedCanal ? `${API_URL}/publicaciones/canal/${selectedCanal}` : `${API_URL}/publicaciones`
-                const response = await fetch(endpoint);
+                const response = await fetch(endpoint, { credentials: "include" });
                 if (!response.ok) { throw new Error("Error al cargar publicaciones"); }
                 const data = await response.json();
                 setPublicaciones(data ?? []);
