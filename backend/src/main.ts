@@ -8,8 +8,16 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  const allowedOrigins = [
+    process.env.FRONTEND_URL ?? 'http://localhost:5173',
+  ];
+  // Agregar origen alternativo si está configurado
+  if (process.env.FRONTEND_URL_ALT) {
+    allowedOrigins.push(process.env.FRONTEND_URL_ALT);
+  }
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:5173',
+    origin: allowedOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
