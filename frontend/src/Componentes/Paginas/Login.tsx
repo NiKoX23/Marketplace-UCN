@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../Styles/Login.css";
 
-const API = "http://localhost:3000/auth";
+const API = "http://172-16-13-104.nip.io:3000/auth";
 
 function Login() {
   const [error, setError] = useState("");
