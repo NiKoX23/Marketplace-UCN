@@ -26,7 +26,7 @@ fi
 echo "[+] Usando: $COMPOSE"
 
 echo "[+] Entrando al repositorio..."
-cd /home/daniel/Marketplace-UCN
+cd /home/adminc/Marketplace-UCN
 
 echo "[+] Actualizando repo..."
 git pull origin main

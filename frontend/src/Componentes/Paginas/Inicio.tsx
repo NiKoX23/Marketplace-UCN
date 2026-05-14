@@ -57,11 +57,7 @@ function Inicio() {
     useEffect(() => {
         const fetchOfertas = async () => {
             try {
-<<<<<<< HEAD
-                const res = await fetch("http://172-16-13-104.nip.io:3000/publicaciones");
-=======
                 const res = await fetch("http://172-16-13-104.nip.io:3000/publicaciones", { credentials: "include" });
->>>>>>> ea1d8d80ad5967b3c492692be355035df89e15b8
                 if (res.ok) {
                     const data = await res.json();
                     setUltimasOfertas(data.slice(0, 5));
